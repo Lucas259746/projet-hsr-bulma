@@ -4,12 +4,9 @@ import './App.css';
 function App() {
   const [userId, setUserId] = useState('701536690');
   const [language, setLanguage] = useState('en');
-  const [dataRaw, setDataRaw] = useState(null);
   const [dataParsed, setDataParsed] = useState(null);
-  const [panel, setPanel] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('parsed');
 
   const languages = [
     { code: 'en', name: '🇬🇧 English' },
@@ -32,32 +29,17 @@ function App() {
 
     setLoading(true);
     setError(null);
-    setDataRaw(null);
     setDataParsed(null);
-    setPanel(null);
 
     try {
-      // Récupérer les données parsées
-      const resParsed = await fetch(`http://localhost:5000/api/sr_info_parsed/${userId}?language=${language}&lang=${language}`);
-      if (resParsed.ok) {
-        setDataParsed(await resParsed.json());
+      const res = await fetch(`http://localhost:5000/api/user/${userId}?language=${language}`);
+      
+      if (!res.ok) {
+        throw new Error(`Erreur ${res.status}: Impossible de récupérer les données. Vérifiez votre ID.`);
       }
 
-      // Récupérer les données brutes
-      const resRaw = await fetch(`http://localhost:5000/api/sr_info/${userId}?language=${language}&lang=${language}`);
-      if (resRaw.ok) {
-        setDataRaw(await resRaw.json());
-      }
-
-      // Récupérer le panel
-      const resPanel = await fetch(`http://localhost:5000/api/sr_panel/${userId}?language=${language}&lang=${language}`);
-      if (resPanel.ok) {
-        setPanel(await resPanel.json());
-      }
-
-      if (!resParsed.ok && !resRaw.ok) {
-        throw new Error('Impossible de récupérer les données. Vérifiez votre ID.');
-      }
+      const userData = await res.json();
+      setDataParsed(userData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -111,39 +93,11 @@ function App() {
 
         {error && <div className="error">{error}</div>}
 
-        {(dataRaw || dataParsed || panel) && (
+        {dataParsed && (
           <div className="data-section">
-            <div className="tabs">
-              {dataParsed && (
-                <button
-                  className={`tab ${activeTab === 'parsed' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('parsed')}
-                >
-                  📊 Données Parsées
-                </button>
-              )}
-              {dataRaw && (
-                <button
-                  className={`tab ${activeTab === 'raw' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('raw')}
-                >
-                  📋 Données Brutes
-                </button>
-              )}
-              {panel && (
-                <button
-                  className={`tab ${activeTab === 'panel' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('panel')}
-                >
-                  🎨 Panel
-                </button>
-              )}
-            </div>
-
+            <h2>👤 Données du Joueur</h2>
             <div className="tab-content">
-              {activeTab === 'parsed' && dataParsed && renderData(dataParsed)}
-              {activeTab === 'raw' && dataRaw && renderData(dataRaw)}
-              {activeTab === 'panel' && panel && renderData(panel)}
+              {renderData(dataParsed)}
             </div>
           </div>
         )}
