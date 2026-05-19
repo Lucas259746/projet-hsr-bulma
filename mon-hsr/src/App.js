@@ -3,6 +3,7 @@ import './App.css';
 import SearchBox from './components/SearchBox';
 import CharacterList from './components/CharacterList';
 import CharacterDetails from './components/CharacterDetails';
+import RelicSection from './components/RelicSection';
 
 const languages = [
   { code: 'en', name: 'English' },
@@ -37,6 +38,7 @@ function App() {
       const response = await fetch(`http://localhost:5000/api/user/${uid}?language=${lang}`);
       if (!response.ok) throw new Error('Profil introuvable ou erreur API');
       const data = await response.json();
+      console.log('Données de profil chargées :', data);
       setProfile(data);
       setSelectedIndex(0);
     } catch (err) {
@@ -84,14 +86,17 @@ function App() {
           )}
 
           {profile && (
-            <div className="columns">
-              <CharacterList
-                profile={profile}
-                selectedIndex={selectedIndex}
-                onSelectCharacter={setSelectedIndex}
-              />
-              <CharacterDetails activeCharacter={activeCharacter} />
-            </div>
+            <>
+              <div className="columns">
+                <CharacterList
+                  profile={profile}
+                  selectedIndex={selectedIndex}
+                  onSelectCharacter={setSelectedIndex}
+                />
+                <CharacterDetails activeCharacter={activeCharacter} />
+              </div>
+              <RelicSection activeCharacter={activeCharacter} />
+            </>
           )}
         </div>
       </section>
