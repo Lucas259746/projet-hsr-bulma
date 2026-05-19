@@ -7,7 +7,7 @@ function CharacterList({ profile, selectedIndex, onSelectCharacter }) {
         <div className="profile-header mb-4 pb-3">
           <h2 className="title is-4 text-gold font-orbitron mb-1">{sanitizeName(profile.nickname)}</h2>
           <p className="subtitle is-6 has-text-grey-light mb-0">
-            Niveau {profile.level} <span className="mx-2">|</span> Équilibre {profile.worldLevel}
+            Niveau {profile.level} <span className="mx-2">|</span> WorldLevel {profile.worldLevel}
           </p>
         </div>
 

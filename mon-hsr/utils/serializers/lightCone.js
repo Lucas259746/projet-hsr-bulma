@@ -1,10 +1,26 @@
+const { getText } = require('./helpers');
+
 const serializeLightCone = (lightCone, language = 'en') => {
   if (!lightCone) return null;
+  
   return {
     id: lightCone.lightConeData?.id ? String(lightCone.lightConeData?.id) : null,
     name: lightCone.lightConeData?.name?.get(language) || lightCone.lightConeData?.name?.get('en'),
     level: lightCone.level != null ? Number(lightCone.level) : null,
     ascension: lightCone.ascension != null ? Number(lightCone.ascension) : null,
+    rarity: lightCone.lightConeData?.stars != null ? Number(lightCone.lightConeData?.stars) : null,
+    path: lightCone.lightConeData?.path?.name?.get(language) || lightCone.lightConeData?.path?.name?.get('en'),
+    
+    // 🌟 RÉCUPÉRATION DES DESCRIPTIONS DEPUIS L'API
+    description: getText(lightCone.lightConeData?.description, language) || 
+                 getText(lightCone.lightConeData?.description, 'en') || '',
+                 
+    effectName: getText(lightCone.lightConeData?.effect?.name, language) || 
+                getText(lightCone.lightConeData?.effect?.name, 'en') || '',
+                
+    effectDescription: getText(lightCone.lightConeData?.effect?.description, language) || 
+                       getText(lightCone.lightConeData?.effect?.description, 'en') || '',
+
     superimposition: (() => {
       const supRaw = lightCone.superimposition;
       if (supRaw == null) return null;
@@ -31,8 +47,6 @@ const serializeLightCone = (lightCone, language = 'en') => {
       }
       return null;
     })(),
-    rarity: lightCone.lightConeData?.stars != null ? Number(lightCone.lightConeData?.stars) : null,
-    path: lightCone.lightConeData?.path?.name?.get(language) || lightCone.lightConeData?.path?.name?.get('en'),
   };
 };
 
