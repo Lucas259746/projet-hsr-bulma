@@ -1,7 +1,4 @@
 const client = require('../../config/starrail');
-const serializeRelic = require('./relic');
-const serializeLightCone = require('./lightCone');
-const serializeSkill = require('./skill');
 const serializeCharacter = require('./character');
 
 const getUserData = async (userId, language = 'en') => {
@@ -20,18 +17,20 @@ const getUserData = async (userId, language = 'en') => {
       }
     });
 
+    // 🌟 CORRECTION: Vérification de equilibriumLevel et fallback worldLevel
+    const worldLevelValue = user.equilibriumLevel !== undefined ? user.equilibriumLevel : user.worldLevel;
+
     return {
       uid: String(user.uid),
       nickname: user.nickname,
       level: Number(user.level),
-      worldLevel: Number(user.worldLevel),
+      worldLevel: worldLevelValue != null ? Number(worldLevelValue) : null,
       characterCount: Number(user.characterCount),
       lightConeCount: Number(user.lightConeCount),
       relicCount: Number(user.relicCount),
       characterList: combinedCharacters.map(char => serializeCharacter(char, language)),
     };
 
-    return result;
   } catch (error) {
     console.error(`❌ Error fetching user ${userId}:`, error.message);
     throw error;
@@ -39,9 +38,5 @@ const getUserData = async (userId, language = 'en') => {
 };
 
 module.exports = {
-  serializeRelic,
-  serializeLightCone,
-  serializeSkill,
-  serializeCharacter,
   getUserData,
 };

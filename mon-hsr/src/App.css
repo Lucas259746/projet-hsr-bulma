@@ -190,7 +190,7 @@ h6 {
 
 .equipment-title-block .title {
   margin-bottom: 0 !important;
-  line-height: 1.2 !important;
+  line-height: 2 !important;
 }
 
 .equipment-title-block .subtitle {
@@ -208,7 +208,28 @@ h6 {
   flex-shrink: 0;
   font-size: 1.2rem;
   color: #fff;
+  overflow: hidden;
 }
+.equipment-icon-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.lightcone-splash-box {
+  width: 100%;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.lightcone-splash-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 
 .rarity-5 { background: var(--hsr-rarity-5); }
 .rarity-4 { background: var(--hsr-rarity-4); }
@@ -343,4 +364,99 @@ h6 {
   .text-center-mobile {
     text-align: center;
   }
+}
+/* --- Badges de types de compétences --- */
+.skill-type-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--hsr-text-main);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.skill-type-badge.skill-type-normal {
+  background: rgba(108, 117, 125, 0.2);
+  color: #ced4da;
+  border-color: rgba(108, 117, 125, 0.4);
+}
+
+.skill-type-badge.skill-type-skill {
+  background: rgba(52, 152, 219, 0.2);
+  color: #5dade2;
+  border-color: rgba(52, 152, 219, 0.4);
+}
+
+.skill-type-badge.skill-type-ultimate {
+  background: rgba(241, 196, 15, 0.15);
+  color: var(--hsr-gold);
+  border-color: rgba(216, 180, 103, 0.4);
+}
+
+.skill-type-badge.skill-type-talent {
+  background: rgba(46, 204, 113, 0.15);
+  color: #58d68d;
+  border-color: rgba(46, 204, 113, 0.4);
+}
+
+.skill-type-badge.skill-type-technique {
+  background: rgba(155, 89, 182, 0.2);
+  color: #af7ac5;
+  border-color: rgba(155, 89, 182, 0.4);
+}
+.skill-card {
+  position: relative;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.skill-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Tooltip caché par défaut */
+.tooltip-text {
+  visibility: hidden;
+  width: 250px;
+  background-color: #1a202c;
+  color: #fff;
+  text-align: left;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--hsr-gold);
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%; /* Position au-dessus */
+  left: 50%;
+  margin-left: -125px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.lightcone-tooltip-image {
+  width: 100%;
+  border-radius: 6px;
+}
+
+/* Apparition au survol */
+.skill-card:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }

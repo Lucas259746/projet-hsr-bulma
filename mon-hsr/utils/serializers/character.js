@@ -15,7 +15,7 @@ const serializeCharacter = (character, language = 'en') => {
     combatType: character.characterData?.combatType?.name?.get(language) || character.characterData?.combatType?.name?.get('en'),
     lightCone: serializeLightCone(character.lightCone, language),
     relics: character.relics?.map(relic => serializeRelic(relic, language)) || [],
-    skills: character.skills?.map(skill => serializeSkill(skill, language)) || [],
+    skills: character.skills?.map(skill => serializeSkill(skill, language)).filter(Boolean) || [],
   };
 };
 
