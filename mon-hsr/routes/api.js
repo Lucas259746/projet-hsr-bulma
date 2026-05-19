@@ -29,7 +29,8 @@ router.get('/user/:userId', async (req, res) => {
 router.get('/characters', async (req, res) => {
   try {
     const { language = 'en' } = req.query;
-    const characters = client.getAllCharacters();
+    // 🌟 CORRECTION : Utilisation de cachedAssetsManager
+    const characters = client.cachedAssetsManager.getCharacters();
     
     const serialized = characters.map(char => ({
       id: char.id,
@@ -52,7 +53,8 @@ router.get('/characters', async (req, res) => {
 router.get('/light-cones', async (req, res) => {
   try {
     const { language = 'en' } = req.query;
-    const lightCones = client.getAllLightCones();
+    // 🌟 CORRECTION : Utilisation de cachedAssetsManager
+    const lightCones = client.cachedAssetsManager.getLightCones();
     
     const serialized = lightCones.map(lc => ({
       id: lc.id,
@@ -74,13 +76,12 @@ router.get('/light-cones', async (req, res) => {
 router.get('/relics', async (req, res) => {
   try {
     const { language = 'en' } = req.query;
-    const relics = client.getAllRelics();
+    // 🌟 CORRECTION : Utilisation de cachedAssetsManager
+    const relics = client.cachedAssetsManager.getRelics();
     
     const serialized = relics.map(relic => ({
       id: relic.id,
       name: relic.name?.get(language) || relic.name?.get('en'),
-      type: relic.type?.name?.get(language) || relic.type?.name?.get('en'),
-      set: relic.set?.name?.get(language) || relic.set?.name?.get('en'),
       rarity: relic.stars,
     }));
     

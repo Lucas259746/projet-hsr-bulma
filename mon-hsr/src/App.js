@@ -1,107 +1,100 @@
-import { useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
+import SearchBox from './components/SearchBox';
+import CharacterList from './components/CharacterList';
+import CharacterDetails from './components/CharacterDetails';
+
+const languages = [
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'Français' },
+  { code: 'es', name: 'Español' },
+  { code: 'de', name: 'Deutsch' },
+];
 
 function App() {
   const [userId, setUserId] = useState('701536690');
-  const [language, setLanguage] = useState('en');
-  const [dataParsed, setDataParsed] = useState(null);
+  const [language, setLanguage] = useState('fr');
+  const [profile, setProfile] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const languages = [
-    { code: 'en', name: '🇬🇧 English' },
-    { code: 'fr', name: '🇫🇷 Français' },
-    { code: 'es', name: '🇪🇸 Español' },
-    { code: 'de', name: '🇩🇪 Deutsch' },
-    { code: 'cn', name: '🇨🇳 中文' },
-    { code: 'jp', name: '🇯🇵 日本語' },
-    { code: 'kr', name: '🇰🇷 한국어' },
-    { code: 'pt', name: '🇵🇹 Português' },
-    { code: 'ru', name: '🇷🇺 Русский' },
-    { code: 'th', name: '🇹🇭 ไทย' },
-  ];
+  const activeCharacter = useMemo(
+    () => profile?.characterList?.[selectedIndex] || null,
+    [profile, selectedIndex]
+  );
 
-  const fetchUserData = async () => {
-    if (!userId.trim()) {
-      setError('Veuillez entrer un ID de jeu valide');
+  const loadProfile = useCallback(async (uid = userId, lang = language) => {
+    if (!uid.trim()) {
+      setError('Veuillez entrer un UID valide');
       return;
     }
 
     setLoading(true);
     setError(null);
-    setDataParsed(null);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/user/${userId}?language=${language}`);
-      
-      if (!res.ok) {
-        throw new Error(`Erreur ${res.status}: Impossible de récupérer les données. Vérifiez votre ID.`);
-      }
-
-      const userData = await res.json();
-      setDataParsed(userData);
+      const response = await fetch(`http://localhost:5000/api/user/${uid}?language=${lang}`);
+      if (!response.ok) throw new Error('Profil introuvable ou erreur API');
+      const data = await response.json();
+      setProfile(data);
+      setSelectedIndex(0);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, language]);
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      fetchUserData();
-    }
-  };
-
-  const renderData = (data) => {
-    return (
-      <pre className="data-display">
-        {JSON.stringify(data, null, 2)}
-      </pre>
-    );
-  };
+  useEffect(() => {
+    if (!userId.trim()) return;
+    loadProfile();
+  }, [loadProfile]);
 
   return (
     <div className="App">
-      <div className="container">
-        <h1>⭐ Honkai: Star Rail - Profil Joueur</h1>
-
-        <div className="input-section">
-          <input
-            type="text"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Entrez votre ID de jeu..."
-            className="user-input"
-          />
-          <select 
-            value={language} 
-            onChange={(e) => setLanguage(e.target.value)}
-            className="language-select"
-          >
-            {languages.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
-          <button onClick={fetchUserData} disabled={loading} className="search-btn">
-            {loading ? 'Chargement...' : 'Rechercher'}
-          </button>
-        </div>
-
-        {error && <div className="error">{error}</div>}
-
-        {dataParsed && (
-          <div className="data-section">
-            <h2>👤 Données du Joueur</h2>
-            <div className="tab-content">
-              {renderData(dataParsed)}
-            </div>
+      <section className="hero is-dark is-small app-banner">
+        <div className="hero-body">
+          <div className="container text-center-mobile">
+            <h1 className="title is-3 font-orbitron text-gold mb-1">
+              <i className="fa-solid fa-arrow-trend-up mr-2"></i>ASTRAL DATABASE
+            </h1>
+            <p className="subtitle is-6 has-text-grey-light">Honkai Star Rail Showcase Viewer</p>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
+
+      <SearchBox
+        userId={userId}
+        setUserId={setUserId}
+        language={language}
+        setLanguage={setLanguage}
+        languages={languages}
+        loading={loading}
+        onSearch={() => loadProfile()}
+      />
+
+      <section className="section pt-2">
+        <div className="container">
+          {error && (
+            <div className="notification is-danger font-orbitron">
+              <button className="delete" onClick={() => setError(null)} />
+              {error}
+            </div>
+          )}
+
+          {profile && (
+            <div className="columns">
+              <CharacterList
+                profile={profile}
+                selectedIndex={selectedIndex}
+                onSelectCharacter={setSelectedIndex}
+              />
+              <CharacterDetails activeCharacter={activeCharacter} />
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

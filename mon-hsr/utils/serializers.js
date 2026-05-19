@@ -65,6 +65,26 @@ const getUserData = async (userId, language = 'en') => {
     const user = await client.fetchUser(userId);
     console.log(`✅ User data fetched for UID: ${userId}`);
     
+    // 📦 Récupération des deux listes (Vitrine + Soutien)
+    const starfaring = user.starfaringCompanions || [];
+    const supports = user.supportCharacters || [];
+    
+    console.log(`[DEBUG] Vitrine : ${starfaring.length} persos | Soutien : ${supports.length} persos`);
+
+    // 🔄 Fusionner les deux tableaux en éliminant les doublons (par ID de personnage)
+    const combinedCharacters = [...starfaring];
+    
+    supports.forEach(supportChar => {
+      const isAlreadyAdded = combinedCharacters.some(
+        char => char.characterData?.id === supportChar.characterData?.id
+      );
+      if (!isAlreadyAdded) {
+        combinedCharacters.push(supportChar);
+      }
+    });
+
+    console.log(`[DEBUG] Total final après fusion : ${combinedCharacters.length} persos`);
+
     return {
       uid: user.uid,
       nickname: user.nickname,
@@ -73,7 +93,8 @@ const getUserData = async (userId, language = 'en') => {
       characterCount: user.characterCount,
       lightConeCount: user.lightConeCount,
       relicCount: user.relicCount,
-      characterList: user.getCharacters()?.map(char => serializeCharacter(char, language)) || [],
+      // On sérialise la liste fusionnée et nettoyée
+      characterList: combinedCharacters.map(char => serializeCharacter(char, language)),
       challenge: user.challenge,
       abyss: user.abyss,
     };
