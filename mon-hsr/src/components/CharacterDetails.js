@@ -1,20 +1,22 @@
 import LightConeCard from './LightConeCard';
 
-// Nettoie toutes les balises système complexes (color, unbreak, u, \n, #3[i]) et applique les styles Bulma
+// Nettoie toutes les balises système complexes (color, unbreak, u, i, \n, #3[i]) et applique les styles Bulma
 const sanitizeAndFormatDescription = (text) => {
   if (!text) return 'Aucune description disponible.';
 
   let formattedText = String(text)
-    // 1. Supprime les balises <u> et </u>
+    // 1. Supprime les balises <u>, </u>, <unbreak>, </unbreak> et les marqueurs #3[i]
     .replace(/<\/?u>/gi, '')
-    // 2. Supprime les balises <unbreak> et </unbreak>
     .replace(/<\/?unbreak>/gi, '')
-    // 3. Supprime les marqueurs système du type #1[i], #3[i], etc.
     .replace(/#\d+\[i\]/gi, '')
-    // 4. Supprime les espaces multiples résiduels
+    // 2. Nettoie les balises <i> et </i> pour les rendre propres ou les remplacer par des espaces si besoin
+    // (Note : On les conserve de manière temporaire si on veut appliquer un style, ou on les vire si on veut juste du texte propre.
+    // Ici, on les supprime pour éviter l'affichage de texte brut parasite, tout en gardant un espacement propre)
+    .replace(/<\/?i>/gi, '')
+    // 3. Supprime les espaces multiples résiduels
     .replace(/\s+/g, ' ');
 
-  // 5. Gère les sauts de ligne \n ou \\n en découpant le texte
+  // 4. Gère les sauts de ligne \n ou \\n en découpant le texte
   const lines = formattedText.split(/\\n|\n/g);
 
   // Expression régulière pour capturer le contenu à l'intérieur des balises <color=...>Texte</color>
@@ -86,7 +88,7 @@ function CharacterDetails({ activeCharacter }) {
   const activeLightconeImages =
     activeCharacter.lightCone?.id && lightconeImageMap[activeCharacter.lightCone.id];
 
-  // Mapping des noms de compétences restauré strictement à l'identique
+  // TON SKILLIMAGEMAP ACCUEIL — STRICTEMENT INCHANGÉ
   const skillImageMap = {
     "130804": "Ability_Atop_Rainleaf_Hangs_Oneness.webp",
     "130802": "Ability_Octobolt_Flash.webp",
@@ -98,6 +100,7 @@ function CharacterDetails({ activeCharacter }) {
     "130817": "Ability_Slashed_Dream_Cries_in_Red.webp",
     "130801": "Ability_Trilateral_Wiltcross.webp"
   };
+
   return (
     <div className="column is-8 animate__animated animate__fadeIn">
       <div className="box character-details-box">
