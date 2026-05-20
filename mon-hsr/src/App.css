@@ -1,37 +1,29 @@
 ﻿/* ==========================================
-   HONKAI STAR RAIL — BULMA FIRST THEME
+   HONKAI STAR RAIL — BULMA THEME OVERRIDES
    ========================================== */
 
 :root {
   --hsr-bg: #0b0e14;
-
   --hsr-surface: rgba(20, 26, 38, 0.96);
   --hsr-surface-light: rgba(255, 255, 255, 0.04);
-
   --hsr-border: rgba(216, 180, 103, 0.2);
-
   --hsr-gold: #d8b467;
   --hsr-gold-light: #ece3c5;
-
   --hsr-text-main: #f4f5f7;
   --hsr-text-muted: #b3b3b3;
-
   --hsr-rarity-5: linear-gradient(135deg, #e49733 0%, #a45a16 100%);
   --hsr-rarity-4: linear-gradient(135deg, #9b59b6 0%, #5b2c6f 100%);
   --hsr-rarity-3: linear-gradient(135deg, #2980b9 0%, #1a5276 100%);
-
   --hsr-glow: 0 0 12px rgba(216, 180, 103, 0.12);
 }
 
 /* ==========================================
-   GLOBAL
+   1. GLOBAL & TYPOGRAPHIE
    ========================================== */
 
-html,
-body,
-#root {
+html, body, #root {
   min-height: 100%;
-  background: var(--hsr-bg);
+  background-color: var(--hsr-bg);
 }
 
 body {
@@ -41,486 +33,156 @@ body {
 
 .App {
   min-height: 100vh;
-  background: var(--hsr-bg);
-  color: var(--hsr-text-main);
   padding-bottom: 3rem;
 }
 
+/* Utilitaires de texte personnalisés (Façon Bulma) */
 .font-orbitron {
   font-family: "Orbitron", sans-serif;
   letter-spacing: 0.05em;
 }
 
-.w-100 {
-  width: 100%;
-}
+.has-text-gold { color: var(--hsr-gold) !important; }
+.has-text-gold-light { color: var(--hsr-gold-light) !important; }
 
-/* ==========================================
-   TYPOGRAPHY
-   ========================================== */
-
-.title,
-.subtitle,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.label,
-.content {
+/* Surcharges des titres Bulma */
+.title, .subtitle, .label, .content {
   color: var(--hsr-text-main) !important;
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
-.text-gold {
-  color: var(--hsr-gold) !important;
-}
-
-.text-gold-light {
-  color: var(--hsr-gold-light) !important;
-}
-
-.has-text-grey-light {
-  color: var(--hsr-text-muted) !important;
-}
-
 /* ==========================================
-   HERO / BANNER
+   2. SURCHARGE DES COMPOSANTS BULMA (SKINNING)
    ========================================== */
 
-.hero.is-dark.app-banner {
-  background:
-    linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)),
-    #101621;
-
-  border-bottom: 1px solid var(--hsr-border);
-}
-
-.app-banner .hero-body {
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
-}
-
-.app-banner .title {
-  line-height: 1.15 !important;
-  margin-bottom: 1rem !important;
-}
-
-.app-banner .subtitle {
-  line-height: 1.4 !important;
-  margin-top: 0 !important;
-}
-
-/* ==========================================
-   BULMA COMPONENTS
-   ========================================== */
-
-.box,
-.card,
-.message,
-.notification {
-  background: var(--hsr-surface);
+/* Boîtes et Cartes */
+.box, .card, .message, .notification, .search-box {
+  background-color: var(--hsr-surface);
   border: 1px solid var(--hsr-border);
   box-shadow: var(--hsr-glow);
   color: var(--hsr-text-main);
 }
 
-.card-content {
-  background: transparent;
+.card-content { background: transparent; }
+
+/* Formulaires */
+.input, .select select, .textarea {
+  background-color: rgba(0,0,0,.25);
+  border-color: var(--hsr-border);
+  color: var(--hsr-text-main);
 }
 
-/* ==========================================
-   SEARCH
-   ========================================== */
-
-.search-box {
-  background: rgba(16, 22, 33, 0.96);
-  padding: 1.25rem;
+.input:focus, .select select:focus, .textarea:focus {
+  border-color: var(--hsr-gold);
+  box-shadow: 0 0 0 0.125em rgba(216, 180, 103, 0.2);
 }
 
-/* ==========================================
-   PROFILE
-   ========================================== */
-
-.profile-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-
-  border-bottom: 1px solid rgba(216, 180, 103, 0.15);
-}
-
-.profile-header .title {
-  margin-bottom: 0 !important;
-}
-
-.profile-header .subtitle {
-  margin-top: 0 !important;
-  line-height: 1.3;
-}
-
-/* ==========================================
-   TAGS
-   ========================================== */
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag {
-  border-radius: 6px;
-}
-
+/* Tags */
 .tag.is-light {
-  background: rgba(255,255,255,.08);
+  background-color: rgba(255,255,255,.08);
   border: 1px solid rgba(255,255,255,.08);
   color: var(--hsr-text-main);
 }
 
 .tag.is-warning {
-  background: var(--hsr-gold);
+  background-color: var(--hsr-gold);
   color: #111;
   font-weight: 700;
 }
 
 /* ==========================================
-   BUTTONS
+   3. COMPOSANTS SPÉCIFIQUES HONKAI
    ========================================== */
 
-.button.is-hsr,
-.character-card {
-  background: rgba(255,255,255,.04);
-  border: 1px solid transparent;
-  color: var(--hsr-text-main);
-
-  transition:
-    background .2s ease,
-    border-color .2s ease,
-    color .2s ease;
+/* Bannière Hero */
+.hero.app-banner {
+  background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), #101621;
+  border-bottom: 1px solid var(--hsr-border);
 }
 
-.button.is-hsr:hover,
-.button.is-hsr.is-active,
-.character-card:hover,
-.character-card.is-active {
+/* Bordures spécifiques */
+.has-border-bottom-hsr { border-bottom: 1px solid rgba(216, 180, 103, 0.15); }
+.has-border-left-hsr { border-left: 4px solid var(--hsr-gold); }
+
+/* Boutons & Cartes cliquables */
+.button.is-hsr, .character-card {
+  background-color: var(--hsr-surface-light);
+  border: 1px solid transparent;
+  color: var(--hsr-text-main);
+  transition: all .2s ease;
+}
+
+.button.is-hsr:hover, .button.is-hsr.is-active,
+.character-card:hover, .character-card.is-active {
   border-color: var(--hsr-gold);
-  background: rgba(216,180,103,.12);
+  background-color: rgba(216,180,103,.12);
   color: var(--hsr-gold);
 }
 
-/* ==========================================
-   CHARACTER LIST
-   ========================================== */
-
+/* Liste de personnages (Scroll) */
 .character-buttons-container {
-  display: grid;
-  gap: 0.75rem;
-
   max-height: 60vh;
   overflow-y: auto;
-
-  padding-right: 5px;
 }
 
-.character-card {
-  width: 100%;
-  text-align: left;
-  padding: 1rem;
-  border-radius: 8px;
-}
-
-/* ==========================================
-   EQUIPMENT
-   ========================================== */
-
-.detail-card,
-.equipment-card {
-  background: rgba(12, 17, 29, 0.96);
-  border: 1px solid rgba(216, 180, 103, 0.15);
-  border-left: 4px solid var(--hsr-gold);
-}
-
-/* IMPORTANT FIX */
-.media,
-.media-content,
-.equipment-info,
-.equipment-title-block {
-  min-width: 0;
-}
-
-.equipment-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-
-  width: 100%;
-}
-
-.equipment-title-block {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.equipment-title-block .title {
-  margin-bottom: 0.35rem !important;
-  line-height: 1.2 !important;
-}
-
-.equipment-title-block .subtitle {
-  margin-top: 0 !important;
-  line-height: 1.25 !important;
-}
-
-/* ==========================================
-   ICONS
-   ========================================== */
-
-.equipment-icon,
+/* Icônes et Rareté */
 .equipment-icon-frame {
-  width: 52px !important;
-  height: 52px !important;
-
-  min-width: 52px;
-  min-height: 52px;
-
-  flex-shrink: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+  width: 52px;
+  height: 52px;
   border-radius: 6px;
   overflow: hidden;
 }
 
-.equipment-icon img,
 .equipment-icon-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
-/* ==========================================
-   RARITY
-   ========================================== */
+.rarity-5 { background: var(--hsr-rarity-5); }
+.rarity-4 { background: var(--hsr-rarity-4); }
+.rarity-3 { background: var(--hsr-rarity-3); }
 
-.rarity-5 {
-  background: var(--hsr-rarity-5);
-}
-
-.rarity-4 {
-  background: var(--hsr-rarity-4);
-}
-
-.rarity-3 {
-  background: var(--hsr-rarity-3);
-}
-
-/* ==========================================
-   LIGHTCONE
-   ========================================== */
-
-.lightcone-meta-box {
-  background: rgba(255,255,255,.04);
-
-  padding: 0.75rem;
-
-  border-radius: 8px;
-
-  border: 1px solid rgba(255,255,255,.06);
-}
-
-.lightcone-splash-box {
-  width: 100%;
-  max-width: 420px;
-
-  margin: 0 auto;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lightcone-splash-image {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-/* ==========================================
-   SKILLS
-   ========================================== */
-
-.skill-section {
-  margin-top: 1.5rem;
-}
-
-.skill-list,
-.skill-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
-
-  gap: 1rem;
-
-  margin-top: 0.75rem;
-}
-
+/* Compétences */
 .skill-card {
-  position: relative;
-
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-
-  padding: 1rem;
-
   border-radius: 10px;
-
-  background: rgba(255,255,255,.03);
-
+  background-color: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.06);
-
-  transition: background .2s ease;
+  transition: background-color .2s ease;
 }
 
 .skill-card:hover {
-  background: rgba(255,255,255,.05);
+  background-color: rgba(255,255,255,.05);
 }
 
-.skill-icon {
-  width: 48px;
-  height: 48px;
-
-  min-width: 48px;
-
-  border-radius: 10px;
-
-  overflow: hidden;
-
-  background: rgba(255,255,255,.06);
-
-  flex-shrink: 0;
-}
-
-.skill-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.skill-meta {
-  min-width: 0;
-}
-
-.skill-meta p {
-  margin: 0;
-  word-break: break-word;
-}
-
-.skill-type {
-  color: var(--hsr-gold-light);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.skill-level {
-  color: var(--hsr-gold);
-  margin-left: 0.35rem;
-  white-space: nowrap;
+/* Substats des reliques */
+.relic-substats {
+  border-left: 2px dashed rgba(216,180,103,.2);
 }
 
 /* ==========================================
-   SKILL BADGES
+   4. INFOBULLES (TOOLTIP)
    ========================================== */
 
-.skill-type-badge {
-  display: inline-block;
-
-  padding: 2px 6px;
-
-  border-radius: 4px;
-
-  font-size: 0.7rem;
-  font-weight: 600;
-
-  text-transform: uppercase;
-
-  border: 1px solid rgba(255,255,255,.15);
-}
-
-.skill-type-normal {
-  background: rgba(108,117,125,.15);
-  color: #ced4da;
-}
-
-.skill-type-skill {
-  background: rgba(52,152,219,.15);
-  color: #5dade2;
-}
-
-.skill-type-ultimate {
-  background: rgba(241,196,15,.12);
-  color: var(--hsr-gold);
-}
-
-.skill-type-talent {
-  background: rgba(46,204,113,.12);
-  color: #58d68d;
-}
-
-.skill-type-technique {
-  background: rgba(155,89,182,.18);
-  color: #af7ac5;
-}
-
-/* ==========================================
-   TOOLTIP
-   ========================================== */
-
-.tooltip-wrapper {
-  position: relative;
-}
+.tooltip-wrapper { position: relative; }
 
 .tooltip-text {
   position: absolute;
-
   bottom: 120%;
   left: 50%;
-
   transform: translateX(-50%);
-
   width: 250px;
-
   padding: 10px;
-
   border-radius: 8px;
-
-  background: #1a202c;
-
+  background-color: #1a202c;
   border: 1px solid var(--hsr-gold);
-
   font-size: 0.75rem;
   line-height: 1.4;
-
   opacity: 0;
   visibility: hidden;
-
   transition: opacity .2s ease;
-
   z-index: 1000;
-
   pointer-events: none;
 }
 
@@ -528,102 +190,4 @@ h6,
 .skill-card:hover .tooltip-text {
   opacity: 1;
   visibility: visible;
-}
-
-.lightcone-tooltip-image {
-  width: 100%;
-  border-radius: 6px;
-}
-
-/* ==========================================
-   RELICS
-   ========================================== */
-
-.relic-section {
-  margin-top: 2rem;
-
-  padding: 1.5rem;
-
-  background: rgba(16, 22, 33, 0.98);
-
-  border: 1px solid rgba(216, 180, 103, 0.15);
-
-  border-radius: 10px;
-}
-
-.relic-scroll-container {
-  display: grid;
-  gap: 1rem;
-}
-
-.relic-box {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.06);
-  box-shadow: none;
-}
-
-.relic-substats {
-  margin-top: 0.75rem;
-
-  padding-left: 1rem;
-
-  border-left: 2px dashed rgba(216,180,103,.2);
-}
-
-.relic-stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 0.35rem;
-
-  font-size: 0.95rem;
-}
-
-/* ==========================================
-   FORMS
-   ========================================== */
-
-.input,
-.select select,
-.textarea {
-  background: rgba(0,0,0,.25);
-  border-color: rgba(216,180,103,.2);
-  color: white;
-}
-
-.input:focus,
-.select select:focus,
-.textarea:focus {
-  border-color: var(--hsr-gold);
-  box-shadow: 0 0 0 0.125em rgba(216,180,103,.2);
-}
-
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-
-@media screen and (max-width: 768px) {
-
-  .hero-body,
-  .text-center-mobile {
-    text-align: center;
-  }
-
-  .equipment-header {
-    gap: 0.75rem;
-  }
-
-  .equipment-title-block .title {
-    font-size: 1rem !important;
-  }
-
-  .equipment-title-block .subtitle {
-    font-size: 0.85rem !important;
-  }
-
-  .skill-list,
-  .skill-grid {
-    grid-template-columns: 1fr;
-  }
 }

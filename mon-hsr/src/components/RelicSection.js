@@ -7,11 +7,13 @@ function RelicSection({ activeCharacter }) {
 
   return (
     <div className="relic-section box mt-5">
-      <h3 className="title is-5 font-orbitron text-gold mb-4">Reliques d'équipement</h3>
+      <h3 className="title is-5 font-orbitron has-text-gold mb-4">Reliques d'équipement</h3>
       {activeCharacter.relics?.length > 0 ? (
-        <div className="relic-scroll-container">
+        <div className="columns is-multiline">
           {activeCharacter.relics.map((relic) => (
-            <RelicCard key={relic.id || relic.name} relic={relic} />
+            <div key={relic.id || relic.name} className="column is-half-tablet is-one-third-desktop">
+              <RelicCard relic={relic} />
+            </div>
           ))}
         </div>
       ) : (

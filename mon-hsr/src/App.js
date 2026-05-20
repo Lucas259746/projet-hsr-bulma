@@ -1,20 +1,20 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react';
-import './App.css';
-import SearchBox from './components/SearchBox';
-import CharacterList from './components/CharacterList';
-import CharacterDetails from './components/CharacterDetails';
-import RelicSection from './components/RelicSection';
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
+import "./App.css";
+import SearchBox from "./components/SearchBox";
+import CharacterList from "./components/CharacterList";
+import CharacterDetails from "./components/CharacterDetails";
+import RelicSection from "./components/RelicSection";
 
 const languages = [
-  { code: 'en', name: 'English' },
-  { code: 'fr', name: 'Français' },
-  { code: 'es', name: 'Español' },
-  { code: 'de', name: 'Deutsch' },
+  { code: "en", name: "English" },
+  { code: "fr", name: "Français" },
+  { code: "es", name: "Español" },
+  { code: "de", name: "Deutsch" },
 ];
 
 function App() {
-  const [userId, setUserId] = useState('701536690');
-  const [language, setLanguage] = useState('fr');
+  const [userId, setUserId] = useState("701536690");
+  const [language, setLanguage] = useState("fr");
   const [profile, setProfile] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -22,31 +22,36 @@ function App() {
 
   const activeCharacter = useMemo(
     () => profile?.characterList?.[selectedIndex] || null,
-    [profile, selectedIndex]
+    [profile, selectedIndex],
   );
 
-  const loadProfile = useCallback(async (uid = userId, lang = language) => {
-    if (!uid.trim()) {
-      setError('Veuillez entrer un UID valide');
-      return;
-    }
+  const loadProfile = useCallback(
+    async (uid = userId, lang = language) => {
+      if (!uid.trim()) {
+        setError("Veuillez entrer un UID valide");
+        return;
+      }
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      const response = await fetch(`http://localhost:5000/api/user/${uid}?language=${lang}`);
-      if (!response.ok) throw new Error('Profil introuvable ou erreur API');
-      const data = await response.json();
-      console.log('Données de profil chargées :', data);
-      setProfile(data);
-      setSelectedIndex(0);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, language]);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/user/${uid}?language=${lang}`,
+        );
+        if (!response.ok) throw new Error("Profil introuvable ou erreur API");
+        const data = await response.json();
+        console.log("Données de profil chargées :", data);
+        setProfile(data);
+        setSelectedIndex(0);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId, language],
+  );
 
   useEffect(() => {
     if (!userId.trim()) return;
@@ -57,11 +62,14 @@ function App() {
     <div className="App">
       <section className="hero is-dark is-small app-banner">
         <div className="hero-body">
-          <div className="container text-center-mobile">
-            <h1 className="title is-3 font-orbitron text-gold mb-1">
+          <div className="container has-text-centered-mobile">
+            <h1 className="title is-3 font-orbitron has-text-gold mb-1">
               <i className="fa-solid fa-arrow-trend-up mr-2"></i>ASTRAL DATABASE
             </h1>
-            <p className="subtitle is-6 has-text-grey-light">Honkai Star Rail Showcase Viewer</p>
+            {/* Ajout de mt-2 ici pour annuler le chevauchement */}
+            <p className="subtitle is-6 has-text-grey-light mt-2">
+              Honkai Star Rail Showcase Viewer
+            </p>
           </div>
         </div>
       </section>

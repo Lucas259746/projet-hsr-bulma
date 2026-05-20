@@ -4,7 +4,7 @@ function LightConeCard({ lightCone }) {
   }
 
   const lightconeImageMap = {
-    "23024": {
+    23024: {
       small: "PP_lightcone_acheron.webp",
       large: "lightcone_acheron.webp",
     },
@@ -13,7 +13,7 @@ function LightConeCard({ lightCone }) {
 
   return (
     <div className="lightcone-container">
-      <div className="equipment-header mb-3">
+      <div className="is-flex is-align-items-center mb-3">
         <div className={`equipment-icon-frame rarity-${lightCone.rarity || 3}`}>
           {activeLightconeImages?.small ? (
             <img
@@ -24,9 +24,12 @@ function LightConeCard({ lightCone }) {
             <span>✦</span>
           )}
         </div>
-        <div className="equipment-title-block">
-          <h5 className="title is-5 mb-1 text-gold">{lightCone.name}</h5>
-          <p className="subtitle is-6 has-text-warning mb-0 font-orbitron">{lightCone.path || 'Voie'}</p>
+        <div className="ml-3">
+          <h5 className="title is-5 mb-1 has-text-gold">{lightCone.name}</h5>
+          {/* Ajout de mt-1 ici */}
+          <p className="subtitle is-6 has-text-warning mb-0 mt-1 font-orbitron">
+            {lightCone.path || "Voie"}
+          </p>
         </div>
       </div>
 
@@ -34,13 +37,16 @@ function LightConeCard({ lightCone }) {
         <div className="column is-6">
           <span className="has-text-grey-light is-size-7">NIVEAU</span>
           <p className="is-size-6 has-text-white font-orbitron">
-            Lv. <span className="text-gold">{lightCone.level || 1}</span>
+            Lv. <span className="has-text-gold">{lightCone.level || 1}</span>
           </p>
         </div>
         <div className="column is-6 has-text-right">
           <span className="has-text-grey-light is-size-7">SUPERPOSITION</span>
           <p className="is-size-6 has-text-white font-orbitron">
-            Rang <span className="has-text-warning">{lightCone.superimposition || 1}</span>
+            Rang{" "}
+            <span className="has-text-warning">
+              {lightCone.superimposition || 1}
+            </span>
           </p>
         </div>
       </div>
