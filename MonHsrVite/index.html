@@ -2,7 +2,8 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- Modification ici : Suppression de %PUBLIC_URL% -->
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0c111d" />
     <meta
@@ -34,5 +35,8 @@
       >Vous devez activer JavaScript pour exécuter cette application.</noscript
     >
     <div id="root"></div>
+
+    <!-- AJOUT CRUCIAL POUR VITE : Point d'entrée de ton application Front-End -->
+    <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>
