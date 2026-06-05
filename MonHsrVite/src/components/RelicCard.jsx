@@ -7,7 +7,7 @@ function RelicCard({ relic }) {
         <h5 className="title is-6 mb-0 has-text-gold">{relic.name}</h5>
         <span className="tag is-warning is-small">+{relic.level}</span>
       </div>
-      <p className="is-size-7 has-text-grey-light mb-2">{relic.type || 'Type inconnu'}</p>
+      <p className="is-size-7 has-text-grey-light mb-2">{relic.type}</p>
 
       {relic.mainStat && (
         <div className="relic-mainstat mb-2">
@@ -18,7 +18,7 @@ function RelicCard({ relic }) {
         </div>
       )}
 
-      {relic.subStats && relic.subStats.length > 0 && (
+      {relic.subStats?.length > 0 && (
         <div className="relic-substats pl-3 mt-3">
           {relic.subStats.map((sub, idx) => (
             <div key={idx} className="is-flex is-justify-content-space-between is-size-7 mb-1">

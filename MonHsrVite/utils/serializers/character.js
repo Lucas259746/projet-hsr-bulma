@@ -1,36 +1,42 @@
-const serializeRelic = require("./relic");
-const serializeLightCone = require("./lightCone");
-const serializeSkill = require("./skill");
+// utils/serializers/character.js
 
-const serializeCharacter = (character, language = "en") => {
+const serializeRelic     = require("./relic");
+const serializeLightCone = require("./lightCone");
+const serializeSkill     = require("./skill");
+const serializeStats     = require("./sumStats");
+
+const serializeRelicSet = (set) => {
+  if (!set) return null;
   return {
-    id: character.characterData?.id
-      ? String(character.characterData?.id)
-      : null,
-    name:
-      character.characterData?.name?.get(language) ||
-      character.characterData?.name?.get("en"),
-    level: character.level != null ? Number(character.level) : null,
-    ascension: character.ascension != null ? Number(character.ascension) : null,
-    eidolons: character.eidolons != null ? Number(character.eidolons) : 0,
-    promotion: character.ascension != null ? Number(character.ascension) : null,
-    rarity:
-      character.characterData?.stars != null
-        ? Number(character.characterData?.stars)
-        : null,
-    path:
-      character.characterData?.path?.name?.get(language) ||
-      character.characterData?.path?.name?.get("en"),
-    combatType:
-      character.characterData?.combatType?.name?.get(language) ||
-      character.characterData?.combatType?.name?.get("en"),
-    lightCone: serializeLightCone(character.lightCone, language),
-    relics:
-      character.relics?.map((relic) => serializeRelic(relic, language)) || [],
-    skills:
-      character.skills
-        ?.map((skill) => serializeSkill(skill, language))
-        .filter(Boolean) || [],
+    id:   set.id   ? String(set.id) : null,
+    name: set.name || null,
+    num:  set.num  != null ? Number(set.num) : null,
+    desc: set.desc || null,
+    properties: (set.properties || []).map((p) => ({
+      name:    p.name    || null,
+      display: p.display || null,
+    })),
+  };
+};
+
+const serializeCharacter = (character) => {
+  if (!character) return null;
+
+  return {
+    id:         character.id    ? String(character.id) : null,
+    name:       character.name  || null,
+    level:      character.level     != null ? Number(character.level)     : null,
+    ascension:  character.promotion != null ? Number(character.promotion) : null,
+    eidolons:   character.rank      != null ? Number(character.rank)      : 0,
+    rarity:     character.rarity    != null ? Number(character.rarity)    : null,
+    path:       character.path?.name    || null,
+    combatType: character.element?.name || null,
+
+    lightCone: serializeLightCone(character.light_cone),
+    relics:    (character.relics     || []).map(serializeRelic).filter(Boolean),
+    relicSets: (character.relic_sets || []).map(serializeRelicSet).filter(Boolean),
+    skills:    (character.skills     || []).map(serializeSkill).filter(Boolean),
+    stats:     serializeStats(character),
   };
 };
 

@@ -1,43 +1,40 @@
-const normalizeImageAsset = (asset) => {
-  if (!asset) return null;
-  if (typeof asset === 'string') return asset;
-  return asset.url || asset.path || null;
-};
+// utils/serializers/helpers.js
 
-const getText = (asset, language = 'en') => {
-  if (!asset) return null;
-  if (typeof asset === 'string') return asset;
-  if (typeof asset.get === 'function') {
-    try { return asset.get(language) || asset.get('en') || null; } catch (e) { return null; }
-  }
-  if (asset.dynamicData && Array.isArray(asset.dynamicData.paramList)) {
-    return JSON.stringify(asset.dynamicData.paramList);
-  }
+/**
+ * Retourne une chaîne de texte depuis n'importe quelle valeur brute Mihomo.
+ * L'API Mihomo retourne déjà des chaînes localisées, donc pas besoin de .get().
+ */
+const getText = (value) => {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
   return null;
 };
 
-const normalizeSkillType = (typeAsset, language = 'en') => {
-  if (!typeAsset) return null;
-  let txt = null;
-  if (typeof typeAsset === 'string') txt = typeAsset;
-  else if (typeof typeAsset.get === 'function') {
-    try { txt = typeAsset.get(language) || typeAsset.get('en') || null; } catch (e) { txt = null; }
-  } else if (typeAsset.name && typeof typeAsset.name.get === 'function') {
-    try { txt = typeAsset.name.get(language) || typeAsset.name.get('en') || null; } catch (e) { txt = null; }
-  } else if (typeAsset.id != null) txt = String(typeAsset.id);
-  if (!txt) return null;
-  const s = String(txt).toLowerCase();
-  if (s.includes('ult') || s.includes('ultime') || s.includes('ultimate')) return 'ultimate';
-  if (s.includes('compét') || s.includes('skill')) return 'skill';
-  if (s.includes('attaque') || s.includes('atq') || s.includes('normal')) return 'normal';
-  if (s.includes('talent')) return 'talent';
-  if (s.includes('technique')) return 'technique';
-  if (s.includes('maze')) return 'maze';
-  return txt;
+/**
+ * Retourne l'URL d'un asset image depuis Mihomo.
+ * Mihomo fournit des chemins relatifs, ex: "icon/character/1008.png"
+ */
+const MIHOMO_ASSET_BASE = "https://api.mihomo.me/"; // ou ton propre proxy
+const normalizeImageAsset = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return `${MIHOMO_ASSET_BASE}${path}`;
 };
 
-module.exports = {
-  normalizeImageAsset,
-  getText,
-  normalizeSkillType,
+/**
+ * Normalise le type de compétence vers une clé interne cohérente.
+ */
+const normalizeSkillType = (type) => {
+  if (!type) return "skill";
+  const s = String(type).toLowerCase();
+  if (s === "ultra" || s.includes("ult")) return "ultimate";
+  if (s === "skilladd" || s === "skill") return "skill";
+  if (s === "normal" || s === "attack") return "normal";
+  if (s === "talent") return "talent";
+  if (s === "technique" || s === "maze") return "technique";
+  if (s === "buff") return "buff";
+  return s;
 };
+
+module.exports = { getText, normalizeImageAsset, normalizeSkillType };

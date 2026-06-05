@@ -3,30 +3,14 @@ function LightConeCard({ lightCone }) {
     return <p className="has-text-grey-light">Aucun cône de lumière équipé.</p>;
   }
 
-  const lightconeImageMap = {
-    23024: {
-      small: "PP_lightcone_acheron.webp",
-      large: "lightcone_acheron.webp",
-    },
-  };
-  const activeLightconeImages = lightconeImageMap[lightCone.id];
-
   return (
     <div className="lightcone-container">
       <div className="is-flex is-align-items-center mb-3">
         <div className={`equipment-icon-frame rarity-${lightCone.rarity || 3}`}>
-          {activeLightconeImages?.small ? (
-            <img
-              src={`/lightcone-images/${activeLightconeImages.small}`}
-              alt={`Icône ${lightCone.name}`}
-            />
-          ) : (
-            <span>✦</span>
-          )}
+          <span>✦</span>
         </div>
         <div className="ml-3">
           <h5 className="title is-5 mb-1 has-text-gold">{lightCone.name}</h5>
-          {/* Ajout de mt-1 ici */}
           <p className="subtitle is-6 has-text-warning mb-0 mt-1 font-orbitron">
             {lightCone.path || "Voie"}
           </p>
@@ -43,24 +27,10 @@ function LightConeCard({ lightCone }) {
         <div className="column is-6 has-text-right">
           <span className="has-text-grey-light is-size-7">SUPERPOSITION</span>
           <p className="is-size-6 has-text-white font-orbitron">
-            Rang{" "}
-            <span className="has-text-warning">
-              {lightCone.superimposition || 1}
-            </span>
+            Rang <span className="has-text-warning">{lightCone.superimposition || 1}</span>
           </p>
         </div>
       </div>
-      {activeLightconeImages?.large && (
-        <div className="lightcone-splash-box mt-4">
-          <figure className="image">
-            <img
-              className="lightcone-splash-image"
-              src={`/lightcone-images/${activeLightconeImages.large}`}
-              alt={`Splash ${lightCone.name}`}
-            />
-          </figure>
-        </div>
-      )}
     </div>
   );
 }
