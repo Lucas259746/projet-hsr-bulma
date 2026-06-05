@@ -39,6 +39,7 @@ function App() {
         const response = await fetch(
           `http://localhost:5000/api/user/${uid}?language=${lang}`,
         );
+        console.log("Données de profil chargées :", response);
         if (!response.ok) throw new Error("Profil introuvable ou erreur API");
         const data = await response.json();
         console.log("Données de profil chargées :", data);
