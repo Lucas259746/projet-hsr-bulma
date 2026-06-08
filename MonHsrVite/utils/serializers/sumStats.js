@@ -1,43 +1,37 @@
 // utils/serializers/sumStats.js
-// Utilise "statistics" de Mihomo : totaux finaux déjà calculés.
 
 const serializeStats = (character) => {
   if (!character) return [];
 
   const statistics = character.statistics || [];
+  const attributes = character.attributes || [];
+  const additions = character.additions || [];
 
-  if (Array.isArray(statistics) && statistics.length > 0) {
-    return statistics.map((stat) => ({
-      key:       stat.field || "unknown",
-      name:      stat.name  || (stat.field || "").toUpperCase(),
-      total:     stat.display || String(stat.value ?? 0),
-      isPercent: stat.percent || false,
-    }));
+  // Index base et bonus par field
+  const attrMap = {};
+  for (const a of attributes) {
+    if (a.field) attrMap[a.field] = a;
+  }
+  const addMap = {};
+  for (const a of additions) {
+    if (a.field) addMap[a.field] = a;
   }
 
-  // Fallback attributes+additions si statistics absent
-  const attributes = character.attributes || [];
-  const additions  = character.additions  || [];
-  const addMap = {};
-  for (const a of additions) { if (a.field) addMap[a.field] = a; }
+  if (statistics.length === 0) return [];
 
-  return attributes.map((attr) => {
-    const bonus     = addMap[attr.field] || null;
-    const total     = (attr.value ?? 0) + (bonus?.value ?? 0);
-    const isPercent = attr.percent || false;
-    const fmt = (v) => {
-      if (!v) return "0";
-      if (isPercent) return `${(v * 100).toFixed(1)}%`;
-      if (attr.field.includes("spd")) return v.toFixed(1);
-      return Math.floor(v).toLocaleString();
-    };
+  return statistics.map((stat) => {
+    const base = attrMap[stat.field] || null;
+    const bonus = addMap[stat.field] || null;
+
     return {
-      key:       attr.field || "unknown",
-      name:      attr.name  || (attr.field || "").toUpperCase(),
-      total:     fmt(total),
-      isPercent,
+      key: stat.field || "unknown",
+      name: stat.name || stat.field,
+      total: stat.display || String(stat.value ?? 0),
+      base: base?.display || null,
+      bonus: bonus?.display || null,
+      isPercent: stat.percent || false,
     };
-  }).filter((s) => s.total !== "0");
+  });
 };
 
 module.exports = serializeStats;

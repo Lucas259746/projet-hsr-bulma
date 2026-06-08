@@ -6,8 +6,17 @@ function LightConeCard({ lightCone }) {
   return (
     <div className="lightcone-container">
       <div className="is-flex is-align-items-center mb-3">
+        {/* Icône petite format */}
         <div className={`equipment-icon-frame rarity-${lightCone.rarity || 3}`}>
-          <span>✦</span>
+          {lightCone.icon ? (
+            <img
+              src={lightCone.icon}
+              alt={lightCone.name}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <span>✦</span>
+          )}
         </div>
         <div className="ml-3">
           <h5 className="title is-5 mb-1 has-text-gold">{lightCone.name}</h5>
@@ -31,6 +40,20 @@ function LightConeCard({ lightCone }) {
           </p>
         </div>
       </div>
+
+      {/* Portrait grand format */}
+      {lightCone.portrait && (
+        <div className="lightcone-splash-box mt-4">
+          <figure className="image">
+            <img
+              className="lightcone-splash-image"
+              src={lightCone.portrait}
+              alt={`Splash ${lightCone.name}`}
+              style={{ borderRadius: "8px", width: "100%", objectFit: "cover" }}
+            />
+          </figure>
+        </div>
+      )}
     </div>
   );
 }

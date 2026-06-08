@@ -23,13 +23,12 @@ const serializeLightCone = (lightCone) => {
     path: lightCone.path?.name || null,
     superimposition: lightCone.rank != null ? Number(lightCone.rank) : null,
 
-    // Descriptions depuis le cache Mar-7th (absent de Mihomo parsed)
+    // Descriptions depuis le cache Mar-7th
     description: meta?.desc || null,
     effectDescription: meta?.skillDesc || null,
 
-    // Images
+    // Images directement depuis l'API Mihomo
     icon: assetUrl(lightCone.icon),
-    preview: assetUrl(lightCone.preview),
     portrait: assetUrl(lightCone.portrait),
   };
 };
