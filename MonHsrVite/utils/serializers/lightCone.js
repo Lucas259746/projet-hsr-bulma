@@ -1,13 +1,7 @@
 // utils/serializers/lightCone.js
+// Images gérées côté frontend via imageMap.js
 
 const { getLightConeMeta } = require("../../config/lightConeCache");
-
-const MIHOMO_ASSET_BASE = "https://api.mihomo.me/";
-const assetUrl = (path) => {
-  if (!path) return null;
-  if (path.startsWith("http")) return path;
-  return `${MIHOMO_ASSET_BASE}${path}`;
-};
 
 const serializeLightCone = (lightCone) => {
   if (!lightCone) return null;
@@ -22,14 +16,8 @@ const serializeLightCone = (lightCone) => {
     rarity: lightCone.rarity != null ? Number(lightCone.rarity) : null,
     path: lightCone.path?.name || null,
     superimposition: lightCone.rank != null ? Number(lightCone.rank) : null,
-
-    // Descriptions depuis le cache Mar-7th
     description: meta?.desc || null,
     effectDescription: meta?.skillDesc || null,
-
-    // Images directement depuis l'API Mihomo
-    icon: assetUrl(lightCone.icon),
-    portrait: assetUrl(lightCone.portrait),
   };
 };
 

@@ -1,41 +1,28 @@
 // utils/serializers/skill.js
 
-const { normalizeSkillType } = require("./helpers");
-
-const MIHOMO_ASSET_BASE = "https://api.mihomo.me/";
-const assetUrl = (path) => {
-  if (!path) return null;
-  if (path.startsWith("http")) return path;
-  return `${MIHOMO_ASSET_BASE}${path}`;
-};
-
-// Skills à exclure : MazeNormal sans nom propre (leur name = leur id)
-const shouldExcludeSkill = (skill) => {
+// Skills à exclure : ceux dont le nom == l'id (skills internes sans texte)
+const shouldExclude = (skill) => {
   if (!skill) return true;
-  // Exclure les skills dont le nom est identique à l'id (skills internes sans affichage)
-  if (skill.name === skill.id || skill.name === String(skill.id)) return true;
-  // Exclure MazeNormal (attaques de labyrinthe internes, pas affichées en combat)
-  if (skill.type === "MazeNormal") return true;
-  return false;
+  const name = String(skill.name || "");
+  const id = String(skill.id || "");
+  return name === id;
 };
 
 const serializeSkill = (skill) => {
   if (!skill) return null;
-  if (shouldExcludeSkill(skill)) return null;
+  if (shouldExclude(skill)) return null;
 
   return {
     id: skill.id ? String(skill.id) : null,
     name: skill.name || "Compétence",
-    type: normalizeSkillType(skill.type),
+    type: skill.type || "Normal", // valeur brute conservée (Normal/BPSkill/Ultra/Talent/Maze/MazeNormal/ElationDamage)
     typeText: skill.type_text || null,
     effect: skill.effect || null,
-    effectText: skill.effect_text || null,
     level: skill.level != null ? Number(skill.level) : 1,
     maxLevel: skill.max_level != null ? Number(skill.max_level) : null,
     description: skill.desc || skill.simple_desc || "",
     simpleDesc: skill.simple_desc || "",
     params: [],
-    icon: assetUrl(skill.icon),
   };
 };
 

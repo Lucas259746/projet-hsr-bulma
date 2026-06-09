@@ -1,16 +1,19 @@
+import { getLightConeImages } from "../imageMap";
+
 function LightConeCard({ lightCone }) {
   if (!lightCone) {
     return <p className="has-text-grey-light">Aucun cône de lumière équipé.</p>;
   }
 
+  const images = getLightConeImages(lightCone.id);
+
   return (
     <div className="lightcone-container">
       <div className="is-flex is-align-items-center mb-3">
-        {/* Icône petite format */}
         <div className={`equipment-icon-frame rarity-${lightCone.rarity || 3}`}>
-          {lightCone.icon ? (
+          {images?.icon ? (
             <img
-              src={lightCone.icon}
+              src={images.icon}
               alt={lightCone.name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
@@ -41,13 +44,12 @@ function LightConeCard({ lightCone }) {
         </div>
       </div>
 
-      {/* Portrait grand format */}
-      {lightCone.portrait && (
+      {images?.portrait && (
         <div className="lightcone-splash-box mt-4">
           <figure className="image">
             <img
               className="lightcone-splash-image"
-              src={lightCone.portrait}
+              src={images.portrait}
               alt={`Splash ${lightCone.name}`}
               style={{ borderRadius: "8px", width: "100%", objectFit: "cover" }}
             />
