@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
 import SearchBox from "./components/SearchBox";
-import CharacterList from "./components/CharacterList";
-import CharacterDetails from "./components/CharacterDetails";
-import BottomSection from "./components/BottomSection";
+import CharacterList from "./components/characterComp/CharacterList";
+import CharacterDetails from "./components/characterComp/CharacterDetails";
+import BottomSection from "./components/bottomSection/BottomSection";
 
 const languages = [
   { code: "en", name: "English" },
@@ -13,12 +13,12 @@ const languages = [
 ];
 
 function App() {
-  const [userId, setUserId]           = useState("701536690");
-  const [language, setLanguage]       = useState("fr");
-  const [profile, setProfile]         = useState(null);
+  const [userId, setUserId] = useState("701536690");
+  const [language, setLanguage] = useState("fr");
+  const [profile, setProfile] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const activeCharacter = useMemo(
     () => profile?.characterList?.[selectedIndex] || null,
@@ -27,11 +27,16 @@ function App() {
 
   const loadProfile = useCallback(
     async (uid = userId, lang = language) => {
-      if (!uid.trim()) { setError("Veuillez entrer un UID valide"); return; }
+      if (!uid.trim()) {
+        setError("Veuillez entrer un UID valide");
+        return;
+      }
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:5000/api/user/${uid}?language=${lang}`);
+        const response = await fetch(
+          `http://localhost:5000/api/user/${uid}?language=${lang}`,
+        );
         if (!response.ok) throw new Error("Profil introuvable ou erreur API");
         const data = await response.json();
         setProfile(data);
@@ -66,9 +71,12 @@ function App() {
       </section>
 
       <SearchBox
-        userId={userId} setUserId={setUserId}
-        language={language} setLanguage={setLanguage}
-        languages={languages} loading={loading}
+        userId={userId}
+        setUserId={setUserId}
+        language={language}
+        setLanguage={setLanguage}
+        languages={languages}
+        loading={loading}
         onSearch={() => loadProfile()}
       />
 

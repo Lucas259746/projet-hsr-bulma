@@ -1,4 +1,4 @@
-import { getLightConeImages } from "../imageMap";
+import { getLightConeImages } from "../../imageMap";
 
 function LightConeCard({ lightCone }) {
   if (!lightCone) {
@@ -39,7 +39,10 @@ function LightConeCard({ lightCone }) {
         <div className="column is-6 has-text-right">
           <span className="has-text-grey-light is-size-7">SUPERPOSITION</span>
           <p className="is-size-6 has-text-white font-orbitron">
-            Rang <span className="has-text-warning">{lightCone.superimposition || 1}</span>
+            Rang{" "}
+            <span className="has-text-warning">
+              {lightCone.superimposition || 1}
+            </span>
           </p>
         </div>
       </div>
