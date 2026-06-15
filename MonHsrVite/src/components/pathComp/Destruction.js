@@ -1,0 +1,36 @@
+// Destruction.jsx
+const Destruction = {
+  name: "Voie de la Destruction",
+  positions: {
+    Point01: { x: 300, y: 45 },
+    Point02: { x: 300, y: 120 },
+    Point03: { x: 300, y: 195 },
+    Point04: { x: 300, y: 270 },
+    Point05: { x: 300, y: 345 },
+    Point06: { x: 160, y: 120 },
+    Point07: { x: 160, y: 195 },
+    Point08: { x: 440, y: 160 },
+    Point09: { x: 90, y: 270 },
+    Point10: { x: 90, y: 160 },
+    Point11: { x: 90, y: 80 },
+    Point12: { x: 420, y: 270 },
+    Point13: { x: 510, y: 120 },
+    Point14: { x: 510, y: 195 },
+    Point15: { x: 510, y: 270 },
+    Point16: { x: 175, y: 345 },
+    Point17: { x: 425, y: 345 },
+    Point18: { x: 175, y: 45 },
+    Point19: { x: 425, y: 45 },
+  },
+  rootConnections: [
+    ["Point01", "Point02"],
+    ["Point02", "Point03"],
+    ["Point03", "Point04"],
+    ["Point04", "Point05"],
+    ["Point02", "Point06"],
+    ["Point03", "Point07"],
+    ["Point03", "Point08"],
+    ["Point04", "Point12"],
+  ],
+};
+export default Destruction;

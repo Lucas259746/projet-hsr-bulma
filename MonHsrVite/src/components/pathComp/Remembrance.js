@@ -1,0 +1,40 @@
+const Remembrance = {
+  name: "Voie du Souvenir",
+  positions: {
+    Point01: { x: 300, y: 375 },
+    Point02: { x: 180, y: 215 },
+    Point03: { x: 420, y: 215 },
+    Point04: { x: 300, y: 215 },
+    Point05: { x: 300, y: 305 },
+    Point06: { x: 140, y: 125 },
+    Point07: { x: 300, y: 50 },
+    Point08: { x: 460, y: 125 },
+    Point09: { x: 300, y: 130 },
+    Point10: { x: 220, y: 305 },
+    Point11: { x: 220, y: 125 },
+    Point12: { x: 115, y: 215 },
+    Point13: { x: 380, y: 305 },
+    Point14: { x: 380, y: 125 },
+    Point15: { x: 485, y: 215 },
+    Point16: { x: 460, y: 305 },
+    Point17: { x: 220, y: 400 },
+    Point18: { x: 380, y: 400 },
+    // Memo skills
+    Point19: { x: 175, y: 50 },
+    Point20: { x: 425, y: 50 },
+  },
+  rootConnections: [
+    ["Point01", "Point05"],
+    ["Point05", "Point04"],
+    ["Point04", "Point02"],
+    ["Point04", "Point03"],
+    ["Point04", "Point09"],
+    ["Point02", "Point06"],
+    ["Point09", "Point07"],
+    ["Point03", "Point08"],
+    ["Point09", "Point19"],
+    ["Point09", "Point20"],
+  ],
+};
+
+export default Remembrance;

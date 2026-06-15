@@ -1,0 +1,35 @@
+const Nihility = {
+  name: "Voie du Néant",
+  positions: {
+    Point01: { x: 95, y: 70 },
+    Point02: { x: 210, y: 145 },
+    Point03: { x: 300, y: 215 },
+    Point04: { x: 390, y: 145 },
+    Point05: { x: 505, y: 70 },
+    Point06: { x: 185, y: 295 },
+    Point07: { x: 300, y: 350 },
+    Point08: { x: 415, y: 295 },
+    Point09: { x: 80, y: 160 },
+    Point10: { x: 520, y: 160 },
+    Point11: { x: 130, y: 230 },
+    Point12: { x: 470, y: 230 },
+    Point13: { x: 240, y: 260 },
+    Point14: { x: 360, y: 260 },
+    Point15: { x: 240, y: 370 },
+    Point16: { x: 360, y: 370 },
+    Point17: { x: 300, y: 130 },
+    Point18: { x: 300, y: 405 },
+  },
+  rootConnections: [
+    ["Point01", "Point02"],
+    ["Point05", "Point04"],
+    ["Point02", "Point03"],
+    ["Point04", "Point03"],
+    ["Point17", "Point03"],
+    ["Point03", "Point06"],
+    ["Point03", "Point07"],
+    ["Point03", "Point08"],
+  ],
+};
+
+export default Nihility;
