@@ -1,5 +1,5 @@
 import LightConeCard from "../lightConeComp/LightConeCard";
-import { getCharacterImages } from "../../imageMap";
+import { getCharacterImages } from "../../imageMap/imageMap";
 
 const sanitizeName = (value) => {
   if (!value) return "";

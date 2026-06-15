@@ -1,4 +1,4 @@
-import { getLightConeImages } from "../../imageMap";
+import { getLightConeImages } from "../../imageMap/imageMap";
 
 function LightConeCard({ lightCone }) {
   if (!lightCone) {

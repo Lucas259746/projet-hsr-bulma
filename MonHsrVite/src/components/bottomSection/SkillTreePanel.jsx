@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { PATH_LAYOUTS } from "../pathComp/pathLayouts";
 import { sanitizeAndFormatDescription } from "../characterComp/CharacterDetails";
+// CORRECTION : Double niveau de remontée du dossier pour atteindre imageMap
+import { getTraceDetails } from "../../imageMap/imageMap";
 
 // ── Couleurs et tailles par type d'icône ─────────────────────
 const getNodeStyle = (node) => {
@@ -72,7 +74,6 @@ const getStatLabel = (node) => {
 
 // ── Normalise le path ID de l'API ────────────────────────────
 const getLayout = (path) => {
-  console.log("getLayout called with path:", path);
   if (!path) {
     console.warn("Path non défini");
     return PATH_LAYOUTS["Destruction"];
@@ -80,7 +81,6 @@ const getLayout = (path) => {
 
   const id = typeof path === "object" ? path.id : path;
   const name = typeof path === "object" ? path.name : path;
-  console.log("getLayout resolved to:", PATH_LAYOUTS[id] || PATH_LAYOUTS[name]);
 
   return (
     PATH_LAYOUTS[id] ||
@@ -101,7 +101,6 @@ function Node({ node, pos, isSelected, onClick }) {
   const isMaxed = node.level >= node.max_level;
   const { color, size, ring, shape } = style;
   const half = size / 2;
-  const r = shape === "circle" ? half : 0;
   const rx = shape === "circle" ? half : 9;
 
   const alpha = isMaxed ? "ff" : "28";
@@ -254,6 +253,12 @@ export default function SkillTreePanel({ skillTree, path, charId }) {
     ? skillTree.find((n) => n.id === selected)
     : null;
   const selStyle = selectedNode ? getNodeStyle(selectedNode) : null;
+
+  // Récupération des surcharges de textes personnalisés (Dictionnaire local issu de imageMap)
+  const customDetails = selectedNode ? getTraceDetails(selectedNode.id) : null;
+  const traceName =
+    customDetails?.name || selectedNode?.name || selectedNode?.anchor;
+  const traceDesc = customDetails?.description || selectedNode?.description;
 
   return (
     <div style={{ fontFamily: "'Orbitron', sans-serif" }}>
@@ -486,7 +491,8 @@ export default function SkillTreePanel({ skillTree, path, charId }) {
                         fontWeight: 700,
                       }}
                     >
-                      {selectedNode.name || selectedNode.anchor}
+                      {/* Utilisation du nom personnalisé ou fallback */}
+                      {traceName}
                     </span>
                     <span
                       style={{
@@ -503,7 +509,8 @@ export default function SkillTreePanel({ skillTree, path, charId }) {
                   </div>
                 </div>
               </div>
-              {selectedNode.description ? (
+              {/* Utilisation de la description personnalisée ou fallback */}
+              {traceDesc ? (
                 <p
                   style={{
                     fontSize: "0.73rem",
@@ -512,7 +519,7 @@ export default function SkillTreePanel({ skillTree, path, charId }) {
                     margin: 0,
                   }}
                 >
-                  {sanitizeAndFormatDescription(selectedNode.description)}
+                  {sanitizeAndFormatDescription(traceDesc)}
                 </p>
               ) : (
                 <p

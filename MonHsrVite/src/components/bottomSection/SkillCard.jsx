@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getSkillIcon } from "../../imageMap";
+import { getSkillIcon } from "../../imageMap/imageMap";
 import {
   sanitizeName,
   sanitizeAndFormatDescription,

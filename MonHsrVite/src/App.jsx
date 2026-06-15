@@ -39,6 +39,7 @@ function App() {
         );
         if (!response.ok) throw new Error("Profil introuvable ou erreur API");
         const data = await response.json();
+        console.log("Fetched profile data:", data);
         setProfile(data);
         setSelectedIndex(0);
       } catch (err) {

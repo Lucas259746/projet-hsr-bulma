@@ -201,45 +201,98 @@ export default function BottomSection({ activeCharacter }) {
               />
             </div>
             <div className="column is-4-desktop">
-              <div style={{
-                background: "linear-gradient(180deg, rgba(8,12,20,0.97) 0%, rgba(5,8,15,0.99) 100%)",
-                border: "1px solid rgba(216,180,103,0.15)",
-                borderRadius: "14px",
-                padding: "18px",
-              }}>
-                <p className="font-orbitron mb-4" style={{ fontSize: "0.62rem", color: "#d8b467", letterSpacing: "0.12em" }}>
+              <div
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(8,12,20,0.97) 0%, rgba(5,8,15,0.99) 100%)",
+                  border: "1px solid rgba(216,180,103,0.15)",
+                  borderRadius: "14px",
+                  padding: "18px",
+                }}
+              >
+                <p
+                  className="font-orbitron mb-4"
+                  style={{
+                    fontSize: "0.62rem",
+                    color: "#d8b467",
+                    letterSpacing: "0.12em",
+                  }}
+                >
                   LÉGENDE
                 </p>
                 {[
-                  { color: "#e08c30", label: "Attaque de base",       shape: "square" },
-                  { color: "#4fa3d1", label: "Compétence",            shape: "square" },
-                  { color: "#d4a0e0", label: "Ultime",                shape: "square" },
-                  { color: "#7ecba1", label: "Talent",                shape: "square" },
-                  { color: "#aaaaaa", label: "Technique",             shape: "square" },
-                  { color: "#d8b467", label: "Traces A2 / A4 / A6",  shape: "square" },
-                  { color: "#9b59b6", label: "Mémo-sprite",           shape: "square" },
-                  { color: "#d8b467", label: "Nœuds de statistiques", shape: "circle" },
+                  {
+                    color: "#e08c30",
+                    label: "Attaque de base",
+                    shape: "square",
+                  },
+                  { color: "#4fa3d1", label: "Compétence", shape: "square" },
+                  { color: "#d4a0e0", label: "Ultime", shape: "square" },
+                  { color: "#7ecba1", label: "Talent", shape: "square" },
+                  { color: "#aaaaaa", label: "Technique", shape: "square" },
+                  {
+                    color: "#d8b467",
+                    label: "Traces A2 / A4 / A6",
+                    shape: "square",
+                  },
+                  { color: "#9b59b6", label: "Mémo-sprite", shape: "square" },
+                  {
+                    color: "#d8b467",
+                    label: "Nœuds de statistiques",
+                    shape: "circle",
+                  },
                 ].map(({ color, label, shape }) => (
-                  <div key={label} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                    <div style={{
-                      width: "11px", height: "11px", flexShrink: 0,
-                      borderRadius: shape === "circle" ? "50%" : "3px",
-                      background: color + "30",
-                      border: `1.5px solid ${color}`,
-                      boxShadow: `0 0 4px ${color}44`,
-                    }} />
-                    <span style={{ fontSize: "0.68rem", color: "#a0a0a0", fontFamily: "Inter, sans-serif" }}>
+                  <div
+                    key={label}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "11px",
+                        height: "11px",
+                        flexShrink: 0,
+                        borderRadius: shape === "circle" ? "50%" : "3px",
+                        background: color + "30",
+                        border: `1.5px solid ${color}`,
+                        boxShadow: `0 0 4px ${color}44`,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: "0.68rem",
+                        color: "#a0a0a0",
+                        fontFamily: "Inter, sans-serif",
+                      }}
+                    >
                       {label}
                     </span>
                   </div>
                 ))}
-                <div style={{
-                  marginTop: "14px", paddingTop: "12px",
-                  borderTop: "1px solid rgba(216,180,103,0.1)",
-                }}>
-                  <p style={{ fontSize: "0.58rem", color: "#444", fontStyle: "italic", lineHeight: 1.5, fontFamily: "Inter, sans-serif" }}>
-                    Nœuds transparents = non débloqués.<br />
-                    Les connexions principales varient selon la Voie du personnage.
+                <div
+                  style={{
+                    marginTop: "14px",
+                    paddingTop: "12px",
+                    borderTop: "1px solid rgba(216,180,103,0.1)",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "0.58rem",
+                      color: "#444",
+                      fontStyle: "italic",
+                      lineHeight: 1.5,
+                      fontFamily: "Inter, sans-serif",
+                    }}
+                  >
+                    Nœuds transparents = non débloqués.
+                    <br />
+                    Les connexions principales varient selon la Voie du
+                    personnage.
                   </p>
                 </div>
               </div>
