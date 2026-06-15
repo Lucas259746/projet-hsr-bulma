@@ -1,493 +1,389 @@
-import { useState, useEffect } from "react";
-import { getSkillIcon } from "../../imageMap";
+import { useState } from "react";
+import { PATH_LAYOUTS } from "../pathComp/pathLayouts";
 import { sanitizeAndFormatDescription } from "../characterComp/CharacterDetails";
 
-// Conservation stricte des couleurs d'origine
-const NODE_CONFIG = {
-  skill_basic: { label: "Attaque", color: "#e08c30", size: 44 },
-  skill_skill: { label: "Compét.", color: "#4fa3d1", size: 44 },
-  skill_ultra: { label: "Ultime", color: "#d4a0e0", size: 44 },
-  skill_talent: { label: "Talent", color: "#7ecba1", size: 44 },
-  skill_tech: { label: "Technique", color: "#aaaaaa", size: 38 },
-  trace_a2: { label: "A2", color: "#d8b467", size: 36 },
-  trace_a4: { label: "A4", color: "#d8b467", size: 36 },
-  trace_a6: { label: "A6", color: "#d8b467", size: 36 },
-  memo_skill: { label: "M.Skill", color: "#9b59b6", size: 38 },
-  memo_talent: { label: "M.Talent", color: "#c39bd3", size: 38 },
+// ── Couleurs et tailles par type d'icône ─────────────────────
+const getNodeStyle = (node) => {
+  const icon = node.icon || "";
+  if (icon.includes("basic_atk"))         return { color: "#e08c30", size: 54, ring: true,  shape: "rounded" };
+  if (icon.includes("_skill."))           return { color: "#4fa3d1", size: 54, ring: true,  shape: "rounded" };
+  if (icon.includes("ultimate"))          return { color: "#d4a0e0", size: 54, ring: true,  shape: "rounded" };
+  if (icon.includes("_talent."))          return { color: "#7ecba1", size: 54, ring: true,  shape: "rounded" };
+  if (icon.includes("technique"))         return { color: "#aaaaaa", size: 44, ring: false, shape: "rounded" };
+  if (icon.includes("skilltree"))         return { color: "#d8b467", size: 44, ring: false, shape: "rounded" };
+  if (icon.includes("memosprite"))        return { color: "#9b59b6", size: 48, ring: true,  shape: "rounded" };
+  if (icon.includes("elation") || icon.includes("_path_")) return { color: "#d8b467", size: 48, ring: false, shape: "rounded" };
+  // stat nodes (property icons)
+  if (icon.includes("property") || icon.includes("Icon"))
+    return { color: "#d8b467", size: 30, ring: false, shape: "circle" };
+  return { color: "#d8b467", size: 36, ring: false, shape: "rounded" };
 };
 
-// Layouts thématiques uniques par Path (Base 600x420)
-const PATH_LAYOUTS = {
-  destruction: {
-    name: "Spine & Wings (Ligne brisée agressive)",
-    coords: {
-      basic: { x: 300, y: 50 },
-      skill: { x: 300, y: 130 },
-      ultra: { x: 300, y: 210 },
-      talent: { x: 300, y: 290 },
-      tech: { x: 300, y: 370 },
-      a2: { x: 180, y: 130 },
-      a4: { x: 180, y: 210 },
-      a6: { x: 420, y: 170 },
-      memo_0: { x: 420, y: 290 },
-      ...generateStatCoords(150, 450, [90, 170, 250, 330, 390]),
-    },
-    connections: [
-      ["basic", "skill"],
-      ["skill", "ultra"],
-      ["ultra", "talent"],
-      ["talent", "tech"],
-      ["skill", "a2"],
-      ["ultra", "a4"],
-      ["ultra", "a6"],
-      ["talent", "memo_0"],
-      ["a2", "stat_0"],
-      ["a2", "stat_1"],
-      ["a4", "stat_2"],
-      ["a4", "stat_3"],
-      ["a6", "stat_4"],
-      ["a6", "stat_5"],
-      ["tech", "stat_6"],
-      ["tech", "stat_7"],
-      ["stat_2", "stat_8"],
-      ["stat_5", "stat_9"],
-    ],
-  },
-  erudition: {
-    name: "Hexagonal Cosmic Matrix (Matrice symétrique)",
-    coords: {
-      basic: { x: 300, y: 210 }, // Centre
-      skill: { x: 300, y: 110 },
-      ultra: { x: 390, y: 160 },
-      talent: { x: 390, y: 260 },
-      tech: { x: 300, y: 310 },
-      a2: { x: 210, y: 260 },
-      a4: { x: 210, y: 160 },
-      a6: { x: 300, y: 40 },
-      memo_0: { x: 480, y: 210 },
-      ...generateStatCoords(100, 500, [60, 120, 180, 240, 300, 360]),
-    },
-    connections: [
-      ["basic", "skill"],
-      ["basic", "ultra"],
-      ["basic", "talent"],
-      ["basic", "tech"],
-      ["basic", "a2"],
-      ["basic", "a4"],
-      ["skill", "a6"],
-      ["talent", "memo_0"],
-      ["skill", "stat_0"],
-      ["ultra", "stat_1"],
-      ["talent", "stat_2"],
-      ["tech", "stat_3"],
-      ["a2", "stat_4"],
-      ["a4", "stat_5"],
-      ["a6", "stat_6"],
-      ["memo_0", "stat_7"],
-      ["stat_0", "stat_8"],
-      ["stat_3", "stat_9"],
-    ],
-  },
-  the_hunt: {
-    name: "Arrowhead Forward (Flèche dynamique vers l'avant)",
-    coords: {
-      basic: { x: 70, y: 210 },
-      skill: { x: 170, y: 210 },
-      ultra: { x: 270, y: 210 },
-      talent: { x: 370, y: 210 },
-      tech: { x: 470, y: 210 }, // Pointe
-      a2: { x: 220, y: 110 },
-      a4: { x: 320, y: 110 },
-      a6: { x: 220, y: 310 },
-      memo_0: { x: 320, y: 310 },
-      ...generateStatCoords(120, 520, [50, 90, 150, 270, 330, 370]),
-    },
-    connections: [
-      ["basic", "skill"],
-      ["skill", "ultra"],
-      ["ultra", "talent"],
-      ["talent", "tech"],
-      ["skill", "a2"],
-      ["ultra", "a4"],
-      ["ultra", "a6"],
-      ["talent", "memo_0"],
-      ["a2", "stat_0"],
-      ["a4", "stat_2"],
-      ["a6", "stat_4"],
-      ["memo_0", "stat_5"],
-      ["tech", "stat_1"],
-      ["tech", "stat_3"],
-      ["stat_0", "stat_6"],
-      ["stat_4", "stat_7"],
-      ["stat_2", "stat_8"],
-      ["stat_5", "stat_9"],
-    ],
-  },
-  harmony: {
-    name: "Concentric Mandala (Cercles harmonieux)",
-    coords: {
-      basic: { x: 300, y: 210 },
-      skill: { x: 210, y: 140 },
-      ultra: { x: 390, y: 140 },
-      talent: { x: 390, y: 280 },
-      tech: { x: 210, y: 280 },
-      a2: { x: 300, y: 70 },
-      a4: { x: 480, y: 210 },
-      a6: { x: 300, y: 350 },
-      memo_0: { x: 120, y: 210 },
-      ...generateStatCoords(150, 450, [40, 100, 180, 240, 320, 380]),
-    },
-    connections: [
-      ["basic", "skill"],
-      ["basic", "ultra"],
-      ["basic", "talent"],
-      ["basic", "tech"],
-      ["skill", "a2"],
-      ["ultra", "a4"],
-      ["talent", "a6"],
-      ["tech", "memo_0"],
-      ["a2", "stat_0"],
-      ["a4", "stat_2"],
-      ["a6", "stat_4"],
-      ["memo_0", "stat_5"],
-      ["skill", "stat_1"],
-      ["ultra", "stat_3"],
-      ["talent", "stat_6"],
-      ["tech", "stat_7"],
-      ["stat_0", "stat_8"],
-      ["stat_4", "stat_9"],
-    ],
-  },
-  default: {
-    name: "Standard Constellation Layout",
-    coords: {
-      basic: { x: 300, y: 60 },
-      skill: { x: 200, y: 160 },
-      ultra: { x: 400, y: 160 },
-      talent: { x: 300, y: 260 },
-      tech: { x: 300, y: 360 },
-      a2: { x: 100, y: 160 },
-      a4: { x: 500, y: 160 },
-      a6: { x: 300, y: 160 },
-      memo_0: { x: 400, y: 260 },
-      ...generateStatCoords(120, 480, [100, 200, 300, 400]),
-    },
-    connections: [
-      ["basic", "a6"],
-      ["a6", "talent"],
-      ["a6", "skill"],
-      ["a6", "ultra"],
-      ["talent", "tech"],
-      ["skill", "a2"],
-      ["ultra", "a4"],
-      ["talent", "memo_0"],
-      ["a2", "stat_0"],
-      ["a2", "stat_1"],
-      ["ultra", "stat_2"],
-      ["ultra", "stat_3"],
-      ["a4", "stat_4"],
-      ["a4", "stat_5"],
-      ["tech", "stat_6"],
-      ["tech", "stat_7"],
-      ["basic", "stat_8"],
-      ["talent", "stat_9"],
-    ],
-  },
+const isStatNode  = (node) => (node.icon || "").includes("property") || (node.icon || "").includes("Icon");
+const isMainSkill = (node) => {
+  const icon = node.icon || "";
+  return icon.includes("basic_atk") || icon.includes("_skill.") ||
+         icon.includes("ultimate")  || icon.includes("_talent.") ||
+         icon.includes("memosprite");
 };
 
-// Générateur automatique de coordonnées de secours pour les stats secondaires
-function generateStatCoords(minX, maxX, yLevels) {
-  const res = {};
-  let idx = 0;
-  for (let i = 0; i < yLevels.length; i++) {
-    res[`stat_${idx++}`] = { x: minX, y: yLevels[i] };
-    res[`stat_${idx++}`] = { x: maxX, y: yLevels[i] };
+// ── Label stat depuis l'icône ─────────────────────────────────
+const ICON_TO_LABEL = {
+  IconCriticalChance:    "CRIT %",
+  IconCriticalDamage:    "CRIT DMG",
+  IconMaxHP:             "PV",
+  IconAttack:            "ATQ",
+  IconDefence:           "DÉF",
+  IconSpeed:             "VIT",
+  IconBreakUp:           "Rupt.",
+  IconStatusProbability: "App.Eff",
+  IconStatusResistance:  "Rés.Eff",
+  IconThunderAddedRatio: "⚡ DMG",
+  IconQuantumAddedRatio: "⚛ DMG",
+  IconJoy:               "Allégr.",
+  IconImaginaryAddedRatio: "✦ DMG",
+  IconFireAddedRatio:    "🔥 DMG",
+  IconIceAddedRatio:     "❄ DMG",
+  IconWindAddedRatio:    "💨 DMG",
+  IconPhysicalAddedRatio: "Phy DMG",
+};
+
+const getStatLabel = (node) => {
+  const icon = node.icon || "";
+  for (const [key, label] of Object.entries(ICON_TO_LABEL)) {
+    if (icon.includes(key)) return label;
   }
-  return res;
-}
-
-// Nettoyage et normalisation du nom du Path (ex: "Érudition" -> "erudition")
-const getNormalizedPathKey = (pathName) => {
-  if (!pathName) return "default";
-  const clean = pathName
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Enlève les accents
-    .replace(/^(la|le|l')\s+/i, "") // Enlève l'article éventuel
-    .trim()
-    .replace(/\s+/g, "_");
-
-  return PATH_LAYOUTS[clean] ? clean : "default";
+  // Fallback depuis propLabel ou type
+  return node.propLabel || "✦";
 };
 
-function SkillTreePanel({ skillTree, path }) {
-  const [selectedNode, setSelectedNode] = useState(null);
+// ── Normalise le path ID de l'API ────────────────────────────
+const getLayout = (path) => {
+  if (!path) return PATH_LAYOUTS["Warrior"];
+  const id = typeof path === "object" ? path.id : path;
+  return PATH_LAYOUTS[id] || PATH_LAYOUTS[id?.toLowerCase()] || PATH_LAYOUTS["Warrior"];
+};
 
-  const pathKey = getNormalizedPathKey(path);
-  const layout = PATH_LAYOUTS[pathKey];
+// ─────────────────────────────────────────────────────────────
+// Composant nœud SVG
+// ─────────────────────────────────────────────────────────────
+function Node({ node, pos, isSelected, onClick }) {
+  const style   = getNodeStyle(node);
+  const stat    = isStatNode(node);
+  const main    = isMainSkill(node);
+  const isMaxed = node.level >= node.max_level;
+  const { color, size, ring, shape } = style;
+  const half    = size / 2;
+  const r       = shape === "circle" ? half : 0;
+  const rx      = shape === "circle" ? half : 9;
 
-  // 1. Distribution prédictible des nœuds reçus de l'API dans les slots fixes
-  const nodes = skillTree || [];
-  const basicNode = nodes.find((n) => n.type === "skill_basic");
-  const skillNode = nodes.find((n) => n.type === "skill_skill");
-  const ultraNode = nodes.find((n) => n.type === "skill_ultra");
-  const talentNode = nodes.find((n) => n.type === "skill_talent");
-  const techNode = nodes.find((n) => n.type === "skill_tech");
-  const a2Node = nodes.find((n) => n.type === "trace_a2");
-  const a4Node = nodes.find((n) => n.type === "trace_a4");
-  const a6Node = nodes.find((n) => n.type === "trace_a6");
-
-  const memoNodes = nodes.filter(
-    (n) => n.type === "memo_skill" || n.type === "memo_talent",
-  );
-  const statNodes = nodes.filter(
-    (n) =>
-      n.type?.startsWith("stat_") ||
-      (!n.type?.startsWith("skill_") &&
-        !n.type?.startsWith("trace_") &&
-        !n.type?.startsWith("memo_")),
-  );
-
-  // Construction de la map finale SlotID -> Node de l'API
-  const slotToNodeMap = {};
-  if (basicNode) slotToNodeMap["basic"] = basicNode;
-  if (skillNode) slotToNodeMap["skill"] = skillNode;
-  if (ultraNode) slotToNodeMap["ultra"] = ultraNode;
-  if (talentNode) slotToNodeMap["talent"] = talentNode;
-  if (techNode) slotToNodeMap["tech"] = techNode;
-  if (a2Node) slotToNodeMap["a2"] = a2Node;
-  if (a4Node) slotToNodeMap["a4"] = a4Node;
-  if (a6Node) slotToNodeMap["a6"] = a6Node;
-
-  memoNodes.forEach((node, i) => {
-    slotToNodeMap[`memo_${i}`] = node;
-  });
-  statNodes.forEach((node, i) => {
-    slotToNodeMap[`stat_${i}`] = node;
-  });
-
-  // Sélection automatique du premier nœud disponible au chargement
-  useEffect(() => {
-    if (basicNode) {
-      setSelectedNode(basicNode);
-    } else if (nodes.length > 0) {
-      setSelectedNode(nodes[0]);
-    }
-  }, [skillTree]);
+  const alpha   = isMaxed ? "ff" : "28";
+  const border  = isSelected ? color : isMaxed ? color : "rgba(255,255,255,0.18)";
+  const bWidth  = isSelected ? 2.5 : 1.5;
+  const glow    = isSelected
+    ? `drop-shadow(0 0 8px ${color})`
+    : isMaxed && main
+      ? `drop-shadow(0 0 5px ${color}88)`
+      : "none";
+  const opacity = isMaxed ? 1 : 0.35;
+  const statLabel = stat ? getStatLabel(node) : null;
 
   return (
-    <div
-      className="box has-background-black-ter p-4"
-      style={{ border: "1px solid rgba(216, 180, 103, 0.2)" }}
+    <g
+      onClick={() => onClick(node)}
+      style={{ cursor: "pointer", filter: glow }}
+      transform={`translate(${pos.x}, ${pos.y})`}
     >
-      <div className="is-flex is-justify-content-space-between is-align-items-center mb-3">
-        <h5 className="title is-6 font-orbitron has-text-gold mb-0">
-          Arbre des Traces
-        </h5>
-        <span
-          className="tag is-dark is-small font-orbitron text-transform-uppercase"
-          style={{ color: "#d8b467" }}
+      {/* Anneau extérieur pour skills principaux */}
+      {ring && (
+        <rect
+          x={-(half + 7)} y={-(half + 7)}
+          width={size + 14} height={size + 14}
+          rx={rx + 4}
+          fill="none"
+          stroke={isMaxed ? color + "44" : "rgba(255,255,255,0.05)"}
+          strokeWidth="1"
+        />
+      )}
+
+      {/* Corps */}
+      <rect
+        x={-half} y={-half}
+        width={size} height={size}
+        rx={rx}
+        fill={`${color}${alpha}`}
+        stroke={border}
+        strokeWidth={bWidth}
+        opacity={opacity}
+      />
+
+      {/* Icône via foreignObject */}
+      {node.icon && !stat && (
+        <image
+          href={`https://api.mihomo.me/${node.icon}`}
+          x={-half + 3} y={-half + 3}
+          width={size - 6} height={size - 6}
+          style={{ opacity: isMaxed ? 1 : 0.5 }}
+        />
+      )}
+
+      {/* Label stat */}
+      {stat && (
+        <text
+          textAnchor="middle" dominantBaseline="middle"
+          fill={isMaxed ? color : "#555"}
+          fontSize={statLabel && statLabel.length > 5 ? "7" : "8"}
+          fontFamily="Orbitron, sans-serif"
+          fontWeight="700"
+          style={{ userSelect: "none" }}
         >
-          Design {path || "Standard"}
+          {statLabel}
+        </text>
+      )}
+
+      {/* Level badge (sous le nœud) */}
+      <text
+        y={half + 11}
+        textAnchor="middle"
+        fill={isMaxed ? (stat ? color : "#ddd") : "#444"}
+        fontSize="8"
+        fontFamily="Orbitron, sans-serif"
+        style={{ userSelect: "none" }}
+      >
+        {stat ? statLabel : `${node.level}/${node.max_level}`}
+      </text>
+    </g>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Panel principal
+// ─────────────────────────────────────────────────────────────
+export default function SkillTreePanel({ skillTree, path, charId }) {
+  const [selected, setSelected] = useState(null);
+
+  if (!skillTree?.length)
+    return <p className="has-text-grey-light is-size-7">Données indisponibles.</p>;
+
+  const layout = getLayout(path);
+  const { positions, rootConnections } = layout;
+
+  // Index id → node
+  const byId     = {};
+  const byAnchor = {};
+  skillTree.forEach((n) => {
+    byId[n.id]         = n;
+    byAnchor[n.anchor] = n;
+  });
+
+  // ── Construire toutes les connexions ──────────────────────
+  const connections = [];
+
+  // 1. Connexions ROOT depuis le layout (entre nœuds sans parent dans l'API)
+  rootConnections.forEach(([fromAnchor, toAnchor]) => {
+    const from = positions[fromAnchor];
+    const to   = positions[toAnchor];
+    if (!from || !to) return;
+    const fromNode = byAnchor[fromAnchor];
+    const toNode   = byAnchor[toAnchor];
+    const maxed    = fromNode?.level >= fromNode?.max_level && toNode?.level >= toNode?.max_level;
+    connections.push({ from, to, maxed });
+  });
+
+  // 2. Connexions stat nodes → parent depuis l'API
+  skillTree.forEach((node) => {
+    if (!node.parent) return;
+    const parentNode = byId[String(node.parent)];
+    if (!parentNode) return;
+    const from = positions[parentNode.anchor];
+    const to   = positions[node.anchor];
+    if (!from || !to) return;
+    const maxed = parentNode.level >= parentNode.max_level && node.level >= node.max_level;
+    connections.push({ from, to, maxed });
+  });
+
+  // ── Stats globales ────────────────────────────────────────
+  const total    = skillTree.length;
+  const unlocked = skillTree.filter((n) => n.level >= n.max_level).length;
+  const pct      = Math.round((unlocked / total) * 100);
+
+  const selectedNode = selected ? skillTree.find((n) => n.id === selected) : null;
+  const selStyle     = selectedNode ? getNodeStyle(selectedNode) : null;
+
+  return (
+    <div style={{ fontFamily: "'Orbitron', sans-serif" }}>
+
+      {/* ── Barre de progression ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+        <span style={{ fontSize: "0.6rem", color: "#d8b467", letterSpacing: "0.1em", whiteSpace: "nowrap" }}>
+          TRACES
+        </span>
+        <div style={{ flex: 1, height: "3px", background: "rgba(255,255,255,0.07)", borderRadius: "2px", overflow: "hidden" }}>
+          <div style={{
+            width: `${pct}%`, height: "100%",
+            background: "linear-gradient(90deg, #d8b467, #ece3c5)",
+            transition: "width 0.4s ease",
+            boxShadow: "0 0 6px rgba(216,180,103,0.5)",
+          }} />
+        </div>
+        <span style={{ fontSize: "0.6rem", color: "#d8b467", whiteSpace: "nowrap" }}>
+          {unlocked}/{total}
         </span>
       </div>
 
-      {/* Zone du Skill Tree Interactif */}
-      <div
-        className="skill-tree-canvas-container mb-4"
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "420px",
-          background:
-            "radial-gradient(circle, rgba(20,26,38,0.4) 0%, rgba(11,14,20,0.8) 100%)",
-          borderRadius: "6px",
-          overflow: "hidden",
-        }}
-      >
-        {/* Couche Arrière-plan SVG : Dessin strict des lignes valides */}
+      {/* ── Canvas SVG ── */}
+      <div style={{
+        background: "linear-gradient(180deg, rgba(8,12,20,0.97) 0%, rgba(5,8,15,0.99) 100%)",
+        borderRadius: "14px",
+        border: "1px solid rgba(216,180,103,0.12)",
+        overflow: "hidden",
+        position: "relative",
+      }}>
+        {/* Grille de fond */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(216,180,103,0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(216,180,103,0.02) 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px",
+          pointerEvents: "none",
+        }} />
+
         <svg
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-          }}
+          viewBox="0 0 600 430"
+          width="100%"
+          style={{ display: "block" }}
         >
           <defs>
-            <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(218,165,32,0.15)" />
-              <stop offset="50%" stopColor="rgba(218,165,32,0.4)" />
-              <stop offset="100%" stopColor="rgba(218,165,32,0.15)" />
-            </linearGradient>
+            <filter id="stp-glow">
+              <feGaussianBlur stdDeviation="2.5" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
           </defs>
-          {layout.connections.map(([fromSlot, toSlot], index) => {
-            const fromPos = layout.coords[fromSlot];
-            const toPos = layout.coords[toSlot];
-            const hasFromNode = !!slotToNodeMap[fromSlot];
-            const hasToNode = !!slotToNodeMap[toSlot];
 
-            // Ne dessine la ligne QUE si les deux nœuds existent vraiment dans l'API
-            if (fromPos && toPos && hasFromNode && hasToNode) {
-              return (
-                <line
-                  key={`line-${index}`}
-                  x1={fromPos.x}
-                  y1={fromPos.y}
-                  x2={toPos.x}
-                  y2={toPos.y}
-                  stroke="url(#lineGrad)"
-                  strokeWidth="2"
-                  strokeDasharray={fromSlot.startsWith("stat") ? "3,3" : "none"}
-                />
-              );
-            }
-            return null;
+          {/* Lueur centrale ambiante */}
+          <ellipse cx="300" cy="215" rx="180" ry="120"
+            fill="rgba(216,180,103,0.025)" />
+
+          {/* Lignes de connexion */}
+          {connections.map(({ from, to, maxed }, i) => (
+            <line
+              key={i}
+              x1={from.x} y1={from.y}
+              x2={to.x}   y2={to.y}
+              stroke={maxed ? "rgba(216,180,103,0.5)" : "rgba(255,255,255,0.08)"}
+              strokeWidth={maxed ? 1.8 : 1.2}
+              strokeDasharray={maxed ? "none" : "4 4"}
+              filter={maxed ? "url(#stp-glow)" : "none"}
+            />
+          ))}
+
+          {/* Nœuds */}
+          {skillTree.map((node) => {
+            const pos = positions[node.anchor];
+            if (!pos) return null;
+            return (
+              <Node
+                key={node.id}
+                node={node}
+                pos={pos}
+                isSelected={selected === node.id}
+                onClick={(n) => setSelected((s) => (s === n.id ? null : n.id))}
+              />
+            );
           })}
         </svg>
-
-        {/* Couche Avant-plan : Boutons interactifs positionnés de manière absolue */}
-        {Object.entries(slotToNodeMap).map(([slotId, node]) => {
-          const pos = layout.coords[slotId];
-          if (!pos) return null; // Sécurité si l'API renvoie plus de nœuds que prévu
-
-          const isStat = slotId.startsWith("stat");
-          const config = NODE_CONFIG[node.type] || {
-            label: "Stat",
-            color: "#d8b467",
-            size: 26,
-          };
-
-          const size = isStat ? 26 : config.size;
-          const isSelected = selectedNode?.id === node.id;
-
-          return (
-            <button
-              key={node.id}
-              onClick={() => setSelectedNode(node)}
-              className={`is-flex is-align-items-center is-justify-content-center p-0 ${isSelected ? "is-selected" : ""}`}
-              style={{
-                position: "absolute",
-                left: `${pos.x}px`,
-                top: `${pos.y}px`,
-                transform: "translate(-50%, -50%)",
-                width: `${size}px`,
-                height: `${size}px`,
-                borderRadius: "50%",
-                border: isSelected
-                  ? `2px solid #ffffff`
-                  : `1.5px solid ${config.color}`,
-                background: isSelected
-                  ? config.color
-                  : "rgba(11, 14, 20, 0.95)",
-                boxShadow: isSelected
-                  ? `0 0 12px ${config.color}`
-                  : "0 2px 5px rgba(0,0,0,0.5)",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                zIndex: isSelected ? 10 : 5,
-              }}
-              title={node.name || config.label}
-            >
-              {isStat ? (
-                <div
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    background: isSelected ? "#fff" : config.color,
-                  }}
-                />
-              ) : (
-                <img
-                  src={getSkillIcon(node.icon)}
-                  alt={config.label}
-                  style={{
-                    width: "70%",
-                    height: "70%",
-                    objectFit: "contain",
-                    filter: isSelected ? "brightness(1.5) invert(1)" : "none",
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
-                />
-              )}
-            </button>
-          );
-        })}
       </div>
 
-      {/* Panneau inférieur : Détails du nœud sélectionné */}
+      {/* ── Panneau de détail ── */}
       {selectedNode && (
-        <div
-          className="box has-background-black-bis p-3 mb-0"
-          style={{
-            borderLeft: `3px solid ${NODE_CONFIG[selectedNode.type]?.color || "#d8b467"}`,
-          }}
-        >
-          {!selectedNode.type?.startsWith("stat_") ? (
-            <>
-              <div className="is-flex is-justify-content-space-between is-align-items-center mb-2">
-                <div>
-                  <h6 className="title is-6 has-text-white mb-0 font-orbitron">
-                    {selectedNode.name || NODE_CONFIG[selectedNode.type]?.label}
-                  </h6>
-                  <span
-                    className="tag is-small is-dark font-orbitron mt-1"
-                    style={{ color: NODE_CONFIG[selectedNode.type]?.color }}
-                  >
-                    {NODE_CONFIG[selectedNode.type]?.label || "Trace"}
+        <div style={{
+          marginTop: "12px",
+          padding: "16px 18px",
+          background: "linear-gradient(135deg, rgba(216,180,103,0.06) 0%, rgba(0,0,0,0.4) 100%)",
+          border: "1px solid rgba(216,180,103,0.25)",
+          borderRadius: "12px",
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", left: 0, top: "10%", bottom: "10%",
+            width: "3px",
+            background: selStyle?.color || "#d8b467",
+            borderRadius: "0 2px 2px 0",
+          }} />
+
+          {isStatNode(selectedNode) ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {selectedNode.icon && (
+                <img
+                  src={`https://api.mihomo.me/${selectedNode.icon}`}
+                  alt=""
+                  style={{ width: 32, height: 32, opacity: 0.85 }}
+                />
+              )}
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ color: "#d8b467", fontSize: "0.85rem", fontWeight: 700 }}>
+                    {getStatLabel(selectedNode)}
+                  </span>
+                  <span style={{
+                    padding: "2px 8px", borderRadius: "10px",
+                    background: "rgba(216,180,103,0.1)",
+                    border: "1px solid rgba(216,180,103,0.25)",
+                    color: "#d8b467", fontSize: "0.58rem",
+                  }}>
+                    NŒUD DE STAT
                   </span>
                 </div>
-                <span className="is-size-7 has-text-grey font-orbitron">
-                  Niv. {selectedNode.level} / {selectedNode.maxLevel}
+                <span style={{ fontSize: "0.65rem", color: "#777", marginTop: "2px", display: "block" }}>
+                  Niv. {selectedNode.level} / {selectedNode.max_level}
                 </span>
               </div>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
+                {selectedNode.icon && (
+                  <img
+                    src={`https://api.mihomo.me/${selectedNode.icon}`}
+                    alt=""
+                    style={{ width: 40, height: 40, borderRadius: "8px" }}
+                  />
+                )}
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{
+                      color: selStyle?.color || "#d8b467",
+                      fontSize: "0.88rem", fontWeight: 700,
+                    }}>
+                      {selectedNode.name || selectedNode.anchor}
+                    </span>
+                    <span style={{
+                      padding: "2px 8px", borderRadius: "10px",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "#777", fontSize: "0.58rem",
+                    }}>
+                      Niv. {selectedNode.level} / {selectedNode.max_level}
+                    </span>
+                  </div>
+                </div>
+              </div>
               {selectedNode.description ? (
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    lineHeight: "1.5",
-                    color: "#c8c8c8",
-                  }}
-                >
+                <p style={{ fontSize: "0.73rem", lineHeight: "1.65", color: "#c0c0c0", margin: 0 }}>
                   {sanitizeAndFormatDescription(selectedNode.description)}
                 </p>
               ) : (
-                <p className="is-size-7 has-text-grey style-italic">
-                  Aucune description disponible pour ce nœud principal.
+                <p style={{ fontSize: "0.7rem", color: "#555", fontStyle: "italic", margin: 0 }}>
+                  Aucune description disponible pour cette trace.
                 </p>
               )}
             </>
-          ) : (
-            <div className="is-flex is-align-items-center is-justify-content-space-between">
-              <div
-                className="is-flex is-align-items-center"
-                style={{ gap: "8px" }}
-              >
-                <span className="has-text-gold font-orbitron is-size-6">
-                  {selectedNode.propLabel ||
-                    selectedNode.type.replace("stat_", "").toUpperCase()}
-                </span>
-                <span
-                  className="tag is-small is-dark font-orbitron"
-                  style={{ color: "#d8b467" }}
-                >
-                  Nœud de stat
-                </span>
-              </div>
-              <span className="is-size-7 has-text-grey font-orbitron">
-                Niv. {selectedNode.level} / {selectedNode.maxLevel}
-              </span>
-            </div>
           )}
         </div>
       )}
     </div>
   );
 }
-
-export default SkillTreePanel;
