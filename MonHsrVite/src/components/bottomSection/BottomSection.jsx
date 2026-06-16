@@ -1,8 +1,9 @@
-import { useState } from "react";
 import RelicCard from "../relicComp/RelicCard";
 import SkillCard from "./SkillCard";
-import SkillTreePanel from "./SkillTreePanel";
+import SkillTreePanel from "./skillTreePanel/SkillTreePanel";
+import useBottomSection from "./useBottomSection";
 
+// Mini-composant affichant à droite les bonus d'ensemble activés (ex: Set 2 pièces, Set 4 pièces)
 function RelicSetsPanel({ relicSets }) {
   if (!relicSets?.length) return null;
   return (
@@ -34,85 +35,43 @@ function RelicSetsPanel({ relicSets }) {
   );
 }
 
-const MAIN_TYPES = new Set([
-  "Normal",
-  "BPSkill",
-  "Ultra",
-  "Talent",
-  "Maze",
-  "MazeNormal",
-]);
-const MEMO_TYPES = new Set(["memo_skill", "memo_talent"]);
-const SPECIAL_TYPES = new Set(["ElationDamage"]);
-const TYPE_ORDER = [
-  "Normal",
-  "BPSkill",
-  "Ultra",
-  "Talent",
-  "Maze",
-  "MazeNormal",
-];
-
 export default function BottomSection({ activeCharacter }) {
-  const [activeTab, setActiveTab] = useState("skills");
+  // Déstructuration des variables et listes préparées par le Hook de logique useBottomSection
+  const {
+    activeTab,
+    setActiveTab,
+    tabs,
+    mainSkills,
+    memoSkills,
+    specialSkills,
+    relics,
+    relicSets,
+    skillTree,
+  } = useBottomSection(activeCharacter);
 
   if (!activeCharacter) return null;
 
-  const allSkills = activeCharacter.skills || [];
-  const relics = activeCharacter.relics || [];
-  const relicSets = activeCharacter.relicSets || [];
-  const skillTree = activeCharacter.skillTree || [];
-
-  const memoSkills = skillTree
-    .filter((n) => MEMO_TYPES.has(n.type))
-    .map((n) => ({
-      id: n.id,
-      name:
-        n.name ||
-        (n.type === "memo_skill"
-          ? "Compétence mémo-sprite"
-          : "Talent mémo-sprite"),
-      type: n.type,
-      typeText: n.type,
-      effect: null,
-      level: n.level,
-      maxLevel: n.maxLevel,
-      description: n.description || "",
-      simpleDesc: "",
-    }));
-
-  const mainSkills = TYPE_ORDER.flatMap((t) =>
-    allSkills.filter((s) => s.type === t),
-  );
-  const specialSkills = allSkills.filter(
-    (s) =>
-      SPECIAL_TYPES.has(s.type) ||
-      (!MAIN_TYPES.has(s.type) && !SPECIAL_TYPES.has(s.type)),
-  );
-
-  const tabs = [
-    { id: "skills", label: "Aptitudes" },
-    { id: "relics", label: "Reliques" },
-    { id: "tree", label: "Skill Tree" },
-  ];
-
   return (
     <div className="box mt-4">
+      {/* ── BARRE DE NAVIGATION DES ONGLETS ── */}
       <div className="bottom-tabs-nav">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             className={`bottom-tab-btn${activeTab === tab.id ? " is-active" : ""}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => setActiveTab(tab.id)} // Change l'onglet actif au clic
           >
             {tab.label}
           </button>
         ))}
       </div>
 
+      {/* ── ZONE DE CONTENU DES ONGLETS ── */}
       <div className="bottom-tab-content">
+        {/* ONGLET 1 : LES APTITUDES */}
         {activeTab === "skills" && (
           <div className="columns is-multiline">
+            {/* 1. Compétences classiques */}
             {mainSkills.map((skill) => (
               <div
                 key={skill.id}
@@ -121,6 +80,8 @@ export default function BottomSection({ activeCharacter }) {
                 <SkillCard skill={skill} charId={activeCharacter.id} />
               </div>
             ))}
+
+            {/* 2. Invocations Mémo-sprites (S'il y en a) */}
             {memoSkills.length > 0 && (
               <>
                 <div className="column is-12">
@@ -144,6 +105,8 @@ export default function BottomSection({ activeCharacter }) {
                 ))}
               </>
             )}
+
+            {/* 3. Aptitudes spéciales de combat (S'il y en a) */}
             {specialSkills.length > 0 && (
               <>
                 <div className="column is-12">
@@ -170,8 +133,10 @@ export default function BottomSection({ activeCharacter }) {
           </div>
         )}
 
+        {/* ONGLET 2 : LES RELIQUES */}
         {activeTab === "relics" && (
           <div className="columns">
+            {/* Grille principale listant les pièces d'équipement (Tête, Mains, Torse, Pieds...) */}
             <div className="column is-8">
               <div className="columns is-multiline">
                 {relics.map((relic) => (
@@ -184,22 +149,25 @@ export default function BottomSection({ activeCharacter }) {
                 ))}
               </div>
             </div>
+            {/* Barre latérale droite compilant les bonus de panoplie */}
             <div className="column is-4">
               <RelicSetsPanel relicSets={relicSets} />
             </div>
           </div>
         )}
 
+        {/* ONGLET 3 : L'ARBRE DES TRACES (SKILL TREE) */}
         {activeTab === "tree" && (
           <div className="columns">
+            {/* L'Arbre SVG interactif complexe */}
             <div className="column is-8-desktop">
-              {/* Correction ici : Envoi du path de l'activeCharacter */}
               <SkillTreePanel
                 skillTree={skillTree}
                 charId={activeCharacter.id}
                 path={activeCharacter.path}
               />
             </div>
+            {/* Légende explicative fixe sur le côté droit */}
             <div className="column is-4-desktop">
               <div
                 style={{
