@@ -31,6 +31,14 @@ export const LIGHT_CONES_1308 = {
   },
 };
 
+export const LIGHT_CONES_PASSIVE_1308 = {
+  23024: {
+    pName: "Steerer",
+    pDescription:
+      "Increases the wearer's CRIT DMG by 36%. When the wearer hits an enemy target, inflicts Mirage Fizzle on the enemy, lasting for 1 turn. Each time the wearer attacks, this effect can only trigger 1 time on each target. The wearer deals 24% increased DMG to targets afflicted with Mirage Fizzle, and the DMG dealt by Ultimate additionally increases by 24%.",
+  },
+};
+
 export const TRACES_DETAILS_1308 = {
   1308101: {
     name: "Red Oni",

@@ -1,4 +1,5 @@
 import LightConeCard from "../lightConeComp/LightConeCard";
+import { getLightConeDetails } from "../../imageMap/imageMap";
 import useCharacterDetails, {
   sanitizeName,
   sanitizeAndFormatDescription,
@@ -88,6 +89,10 @@ function CharacterDetails({ activeCharacter }) {
   // Consomme le Hook de logique
   const { hasCharacter, charImages } = useCharacterDetails(activeCharacter);
 
+  const lcDetails = activeCharacter.lightCone
+    ? getLightConeDetails(activeCharacter.lightCone.id)
+    : null;
+
   // Sécurité : Si aucun personnage n'a été cliqué à gauche, affiche un message d'attente neutre
   if (!hasCharacter) {
     return (
@@ -157,28 +162,31 @@ function CharacterDetails({ activeCharacter }) {
               Statistiques
             </h4>
             <StatsPanel stats={activeCharacter.stats} />
+            {/* Passif déplacé ici */}
+            <div className="mt-5 p-3 rounded has-border-left-hsr">
+              <h4 className="title is-5 font-orbitron has-text-gold mb-3">
+                Passif lightCone
+              </h4>
+              <h5 className="title is-6 has-text-gold">{lcDetails.pName}</h5>
+              <p className="is-size-7 has-text-grey-lighter">
+                {sanitizeAndFormatDescription(lcDetails.pDescription)}
+              </p>
+            </div>
           </div>
 
-          {/* Colonne Droite : Cône de lumière équipé et descriptif de son passif superposé */}
+          {/* Colonne Droite : Cône de lumière équipé */}
           <div className="column is-6">
             <h4 className="title is-5 font-orbitron has-text-gold mb-3">
               Cône de lumière
             </h4>
             <div className="box equipment-box">
               <LightConeCard lightCone={activeCharacter.lightCone} />
-              {activeCharacter.lightCone?.effectDescription && (
-                <div className="mt-4 p-3 rounded has-background-black-bis has-border-left-hsr">
-                  <h5 className="title is-6 has-text-gold mb-2">
-                    {sanitizeName(activeCharacter.lightCone.name)}
-                  </h5>
-                  <p
-                    className="is-size-7 has-text-grey-lighter"
-                    style={{ lineHeight: "1.4" }}
-                  >
-                    {sanitizeAndFormatDescription(
-                      activeCharacter.lightCone.effectDescription,
-                    )}
-                  </p>
+
+              {/* 2. Bloc Histoire (Toujours présent) */}
+              {activeCharacter.lightCone?.storyDescription && (
+                <div className="mt-4 is-italic has-text-grey is-size-7">
+                  <hr />
+                  {activeCharacter.lightCone.storyDescription}
                 </div>
               )}
             </div>
