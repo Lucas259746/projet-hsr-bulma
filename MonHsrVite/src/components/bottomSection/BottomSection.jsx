@@ -1,7 +1,25 @@
 import { useState } from "react";
 import RelicCard from "../relicComp/RelicCard";
-import SkillCard from "./SkillCard";
-import SkillTreePanel from "./SkillTreePanel";
+import SkillCard, { SkillForm } from "./SkillCard";
+import SkillTreePanel from "./skillTreePanel/SkillTreePanel";
+import useBottomSection from "./useBottomSection";
+import {
+  sanitizeName,
+  sanitizeAndFormatDescription,
+} from "../characterComp/CharacterDetails";
+import { getSkillIcon } from "../../imageMap/characterMap/imageMap";
+
+// ── Config couleurs (dupliquée ici pour le panneau de droite) ──
+const SKILL_TYPE_CONFIG = {
+  Normal: { label: "Attaque de base", color: "#e08c30" },
+  BPSkill: { label: "Compétence", color: "#4fa3d1" },
+  Ultra: { label: "Ultime", color: "#d4a0e0" },
+  Talent: { label: "Talent", color: "#7ecba1" },
+  Maze: { label: "Technique", color: "#aaaaaa" },
+  MazeNormal: { label: "Technique", color: "#aaaaaa" },
+  memo_skill: { label: "Mémo-sprite", color: "#9b59b6" },
+  memo_talent: { label: "Mémo-sprite", color: "#9b59b6" },
+};
 
 function RelicSetsPanel({ relicSets }) {
   if (!relicSets?.length) return null;
@@ -34,76 +52,211 @@ function RelicSetsPanel({ relicSets }) {
   );
 }
 
-const MAIN_TYPES = new Set([
-  "Normal",
-  "BPSkill",
-  "Ultra",
-  "Talent",
-  "Maze",
-  "MazeNormal",
-]);
-const MEMO_TYPES = new Set(["memo_skill", "memo_talent"]);
-const SPECIAL_TYPES = new Set(["ElationDamage"]);
-const TYPE_ORDER = [
-  "Normal",
-  "BPSkill",
-  "Ultra",
-  "Talent",
-  "Maze",
-  "MazeNormal",
-];
+// ── Panneau de description d'un skill (colonne droite onglet Skills) ──
+function SkillDetailPanel({ skill, charId }) {
+  if (!skill) {
+    return (
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+        }}
+      >
+        <p
+          style={{
+            color: "#444",
+            fontSize: "0.65rem",
+            fontStyle: "italic",
+            fontFamily: "Inter, sans-serif",
+            textAlign: "center",
+          }}
+        >
+          Sélectionne une aptitude
+          <br />
+          pour afficher ses détails
+        </p>
+      </div>
+    );
+  }
+
+  const cfg = SKILL_TYPE_CONFIG[skill.type] || {
+    label: skill.typeText || skill.type,
+    color: "#d8b467",
+  };
+  const hasDesc = !!(
+    skill.description ||
+    skill.simpleDesc ||
+    (skill.isGrouped && skill.forms?.length)
+  );
+
+  return (
+    <div
+      style={{
+        padding: "16px 18px",
+        background:
+          "linear-gradient(135deg, rgba(216,180,103,0.04) 0%, rgba(0,0,0,0.3) 100%)",
+        border: `1px solid ${cfg.color}33`,
+        borderRadius: "12px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Trait coloré gauche */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: "8%",
+          bottom: "8%",
+          width: "3px",
+          background: cfg.color,
+          borderRadius: "0 2px 2px 0",
+        }}
+      />
+
+      {/* En-tête : icône + nom + type */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "14px",
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: "9px",
+            background: `${cfg.color}18`,
+            border: `1.5px solid ${cfg.color}55`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <img
+            src={getSkillIcon(charId, skill.type)}
+            alt={skill.name}
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        </div>
+        <div>
+          <p
+            style={{
+              color: "#fff",
+              fontSize: "0.9rem",
+              fontWeight: 700,
+              margin: 0,
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            {sanitizeName(skill.name)}
+          </p>
+          <span
+            style={{
+              color: cfg.color,
+              fontSize: "0.6rem",
+              fontFamily: "Orbitron, sans-serif",
+            }}
+          >
+            {cfg.label}
+            {skill.level != null && (
+              <span style={{ color: "#666", marginLeft: "8px" }}>
+                Niv. {skill.level} / {skill.maxLevel}
+              </span>
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Corps : formes groupées ou description simple */}
+      {hasDesc ? (
+        skill.isGrouped && skill.forms?.length ? (
+          skill.forms.map((form, idx) => (
+            <SkillForm
+              key={form.id}
+              form={form}
+              charId={charId}
+              color={cfg.color}
+              isFirst={idx === 0}
+              formIndex={idx}
+            />
+          ))
+        ) : (
+          <div
+            style={{
+              fontSize: "0.73rem",
+              lineHeight: "1.7",
+              color: "#c0c0c0",
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            {sanitizeAndFormatDescription(
+              skill.description || skill.simpleDesc,
+            )}
+          </div>
+        )
+      ) : (
+        <p
+          style={{
+            color: "#555",
+            fontSize: "0.7rem",
+            fontStyle: "italic",
+            margin: 0,
+          }}
+        >
+          Aucune description disponible.
+        </p>
+      )}
+    </div>
+  );
+}
 
 export default function BottomSection({ activeCharacter }) {
-  const [activeTab, setActiveTab] = useState("skills");
+  const {
+    activeTab,
+    setActiveTab,
+    tabs,
+    mainSkills,
+    memoSkills,
+    specialSkills,
+    relics,
+    relicSets,
+    skillTree,
+  } = useBottomSection(activeCharacter);
+
+  // Skill sélectionné dans l'onglet Skills
+  const [selectedSkillId, setSelectedSkillId] = useState(null);
 
   if (!activeCharacter) return null;
 
   const allSkills = activeCharacter.skills || [];
-  const relics = activeCharacter.relics || [];
-  const relicSets = activeCharacter.relicSets || [];
-  const skillTree = activeCharacter.skillTree || [];
 
-  const memoSkills = skillTree
-    .filter((n) => MEMO_TYPES.has(n.type))
-    .map((n) => ({
-      id: n.id,
-      name:
-        n.name ||
-        (n.type === "memo_skill"
-          ? "Compétence mémo-sprite"
-          : "Talent mémo-sprite"),
-      type: n.type,
-      typeText: n.type,
-      effect: null,
-      level: n.level,
-      maxLevel: n.maxLevel,
-      description: n.description || "",
-      simpleDesc: "",
-    }));
+  // Liste plate de tous les skills affichés dans la colonne gauche
+  const allDisplayedSkills = [...mainSkills, ...memoSkills, ...specialSkills];
+  const selectedSkill =
+    allDisplayedSkills.find((s) => s.id === selectedSkillId) || null;
 
-  const mainSkills = TYPE_ORDER.flatMap((t) =>
-    allSkills.filter((s) => s.type === t),
-  );
-  const specialSkills = allSkills.filter(
-    (s) =>
-      SPECIAL_TYPES.has(s.type) ||
-      (!MAIN_TYPES.has(s.type) && !SPECIAL_TYPES.has(s.type)),
-  );
-
-  const tabs = [
-    { id: "skills", label: "Aptitudes" },
-    { id: "relics", label: "Reliques" },
-    { id: "tree", label: "Skill Tree" },
-  ];
+  // Reset la sélection quand on change d'onglet
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSelectedSkillId(null);
+  };
 
   return (
     <div className="box mt-4">
+      {/* ── BARRE DE NAVIGATION ── */}
       <div className="bottom-tabs-nav">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             className={`bottom-tab-btn${activeTab === tab.id ? " is-active" : ""}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabChange(tab.id)}
           >
             {tab.label}
           </button>
@@ -111,65 +264,103 @@ export default function BottomSection({ activeCharacter }) {
       </div>
 
       <div className="bottom-tab-content">
+        {/* ══ ONGLET APTITUDES : 2 colonnes ══ */}
         {activeTab === "skills" && (
-          <div className="columns is-multiline">
-            {mainSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className="column is-half-tablet is-one-third-desktop"
-              >
-                <SkillCard skill={skill} charId={activeCharacter.id} />
-              </div>
-            ))}
-            {memoSkills.length > 0 && (
-              <>
-                <div className="column is-12">
+          <div
+            style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}
+          >
+            {/* Colonne gauche : liste des cartes */}
+            <div style={{ width: "260px", flexShrink: 0 }}>
+              {mainSkills.map((skill) => (
+                <SkillCard
+                  key={skill.id}
+                  skill={skill}
+                  charId={activeCharacter.id}
+                  isSelected={selectedSkillId === skill.id}
+                  onClick={() =>
+                    setSelectedSkillId((s) =>
+                      s === skill.id ? null : skill.id,
+                    )
+                  }
+                />
+              ))}
+
+              {memoSkills.length > 0 && (
+                <>
                   <div
-                    className="is-size-7 font-orbitron has-text-grey my-1"
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.08)",
+                      fontSize: "0.55rem",
+                      color: "#555",
+                      fontFamily: "Orbitron, sans-serif",
+                      letterSpacing: "0.12em",
+                      marginTop: "14px",
+                      marginBottom: "6px",
                       paddingTop: "10px",
+                      borderTop: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     MÉMO-SPRITES
                   </div>
-                </div>
-                {memoSkills.map((skill) => (
+                  {memoSkills.map((skill) => (
+                    <SkillCard
+                      key={skill.id}
+                      skill={skill}
+                      charId={activeCharacter.id}
+                      isSelected={selectedSkillId === skill.id}
+                      onClick={() =>
+                        setSelectedSkillId((s) =>
+                          s === skill.id ? null : skill.id,
+                        )
+                      }
+                    />
+                  ))}
+                </>
+              )}
+
+              {specialSkills.length > 0 && (
+                <>
                   <div
-                    key={skill.id}
-                    className="column is-half-tablet is-one-third-desktop"
-                  >
-                    <SkillCard skill={skill} charId={activeCharacter.id} />
-                  </div>
-                ))}
-              </>
-            )}
-            {specialSkills.length > 0 && (
-              <>
-                <div className="column is-12">
-                  <div
-                    className="is-size-7 font-orbitron has-text-grey my-1"
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.08)",
+                      fontSize: "0.55rem",
+                      color: "#555",
+                      fontFamily: "Orbitron, sans-serif",
+                      letterSpacing: "0.12em",
+                      marginTop: "14px",
+                      marginBottom: "6px",
                       paddingTop: "10px",
+                      borderTop: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     APTITUDES SPÉCIALES
                   </div>
-                </div>
-                {specialSkills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="column is-half-tablet is-one-third-desktop"
-                  >
-                    <SkillCard skill={skill} charId={activeCharacter.id} />
-                  </div>
-                ))}
-              </>
-            )}
+                  {specialSkills.map((skill) => (
+                    <SkillCard
+                      key={skill.id}
+                      skill={skill}
+                      charId={activeCharacter.id}
+                      isSelected={selectedSkillId === skill.id}
+                      onClick={() =>
+                        setSelectedSkillId((s) =>
+                          s === skill.id ? null : skill.id,
+                        )
+                      }
+                    />
+                  ))}
+                </>
+              )}
+            </div>
+
+            {/* Colonne droite : panneau de description */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <SkillDetailPanel
+                skill={selectedSkill}
+                charId={activeCharacter.id}
+              />
+            </div>
           </div>
         )}
 
+        {/* ══ ONGLET RELIQUES ══ */}
         {activeTab === "relics" && (
           <div className="columns">
             <div className="column is-8">
@@ -190,51 +381,14 @@ export default function BottomSection({ activeCharacter }) {
           </div>
         )}
 
+        {/* ══ ONGLET SKILL TREE : 2 colonnes ══ */}
         {activeTab === "tree" && (
-          <div className="columns">
-            <div className="column is-8-desktop">
-              <SkillTreePanel
-                skillTree={skillTree}
-                charId={activeCharacter.id}
-              />
-            </div>
-            <div className="column is-4-desktop">
-              <div className="box has-background-black-bis p-4">
-                <p className="is-size-7 font-orbitron has-text-gold mb-3">
-                  LÉGENDE
-                </p>
-                {[
-                  { color: "#e08c30", label: "Attaque de base" },
-                  { color: "#4fa3d1", label: "Compétence" },
-                  { color: "#d4a0e0", label: "Ultime" },
-                  { color: "#7ecba1", label: "Talent" },
-                  { color: "#aaaaaa", label: "Technique" },
-                  { color: "#d8b467", label: "Traces A2 / A4 / A6" },
-                  { color: "#9b59b6", label: "Mémo-sprite (si applicable)" },
-                  { color: "#d8b467", label: "Nœuds de statistiques" },
-                ].map(({ color, label }) => (
-                  <div
-                    key={label}
-                    className="is-flex is-align-items-center mb-2"
-                    style={{ gap: "8px" }}
-                  >
-                    <div
-                      style={{
-                        width: "12px",
-                        height: "12px",
-                        borderRadius: "3px",
-                        background: color,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span className="is-size-7 has-text-grey-lighter">
-                      {label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <SkillTreePanel
+            skillTree={skillTree}
+            charId={activeCharacter.id}
+            path={activeCharacter.path}
+            allSkills={allSkills}
+          />
         )}
       </div>
     </div>

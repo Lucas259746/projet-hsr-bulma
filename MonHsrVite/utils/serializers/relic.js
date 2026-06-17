@@ -1,5 +1,6 @@
 // utils/serializers/relic.js
 
+// L'API identifie les emplacements d'artefacts par des numéros (1 à 6). On les traduit pour l'interface.
 const RELIC_SLOT_LABELS = {
   1: "Tête",
   2: "Main",
@@ -9,7 +10,6 @@ const RELIC_SLOT_LABELS = {
   6: "Corde",
 };
 
-// Nettoie les tags genre {F#...}{M#...} présents dans les noms FR
 const sanitizeGenderTag = (text) => {
   if (!text) return null;
   return String(text)
@@ -19,10 +19,14 @@ const sanitizeGenderTag = (text) => {
     .trim();
 };
 
+// Formate une statistique individuelle de relique (Principale ou Secondaire)
 const serializeStat = (stat) => {
   if (!stat) return null;
   return {
     property: sanitizeGenderTag(stat.name || stat.field || "Stat"),
+    // 🛠️ ASTUCE MATHÉMATIQUE : L'API renvoie parfois les pourcentages sous forme décimale (ex: 0.154 pour 15.4%).
+    // Si stat.percent est vrai, on multiplie par 100 et on garde 1 décimale.
+    // Sinon, c'est une stat fixe (ex: PV bruts), on l'arrondit (Math.floor) et on met des espaces pour les milliers (toLocaleString).
     value:
       stat.display ||
       (stat.percent
@@ -32,6 +36,7 @@ const serializeStat = (stat) => {
   };
 };
 
+// Construit l'objet propre d'une Relique
 const serializeRelic = (relic) => {
   if (!relic) return null;
 

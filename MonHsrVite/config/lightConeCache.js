@@ -19,6 +19,7 @@ const fetchJson = async (url) => {
   const res = await fetch(url, {
     headers: { "User-Agent": "AstralDatabase/1.0" },
   });
+  console.log(`Fetching JSON from ${url}... Status: ${res.status}`);
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return res.json();
 };
@@ -43,16 +44,20 @@ const loadCache = async (language = "en") => {
     // data est un objet { [id]: { ... } } ou un tableau selon la version
     const entries = Array.isArray(data) ? data : Object.values(data);
 
+    // Dans config/lightConeCache.js
     const newCache = {};
     for (const lc of entries) {
       if (!lc.id) continue;
+
+      // DEBUG : Décommentez la ligne ci-dessous pour voir la structure réelle dans votre console
+      // console.log(`Données brutes pour LC ${lc.id}:`, lc);
+
       newCache[String(lc.id)] = {
-        desc: lc.desc || null,
-        skillName: lc.skill?.name || null,
-        skillDesc: lc.skill?.desc || null,
+        desc: lc.desc || "", // Histoire
+        skillName: lc.skill?.name || "", // Nom du passif
+        skillDesc: lc.skill?.desc || "", // Description du passif
       };
     }
-
     cache = newCache;
     lastFetchTime = now;
     console.log(
