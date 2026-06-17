@@ -1,5 +1,5 @@
 import LightConeCard from "../lightConeComp/LightConeCard";
-import { getLightConeDetails } from "../../imageMap/imageMap";
+import { getLightConeDetails } from "../../imageMap/lightconeMap/imageMap";
 import useCharacterDetails, {
   sanitizeName,
   sanitizeAndFormatDescription,

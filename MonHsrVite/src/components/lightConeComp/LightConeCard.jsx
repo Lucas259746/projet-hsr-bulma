@@ -1,4 +1,4 @@
-import { getLightConeImages } from "../../imageMap/imageMap";
+import { getLightConeImages } from "../../imageMap/lightconeMap/imageMap";
 
 function LightConeCard({ lightCone }) {
   // 🛡️ SÉCURITÉ API : Si le personnage n'a pas de cône équipé (cas rare mais possible),

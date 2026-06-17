@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { PATH_LAYOUTS } from "../../pathComp/pathLayouts"; // Contient la carte absolue des coordonnées X/Y par Voie
-import { getTraceDetails, getSkillIcon } from "../../../imageMap/imageMap";
+import { PATH_LAYOUTS } from "../../pathComp/pathLayouts";
+import {
+  getTraceDetails,
+  getSkillIcon,
+} from "../../../imageMap/characterMap/imageMap";
 
-// Détermine l'aspect visuel précis d'un nœud (Taille, couleur, forme) selon son type d'icône d'origine
 export const getNodeStyle = (node) => {
   const icon = node.icon || "";
   if (icon.includes("basic_atk"))
@@ -16,21 +18,19 @@ export const getNodeStyle = (node) => {
   if (icon.includes("technique") || icon.includes("maze"))
     return { color: "#aaaaaa", size: 44, ring: false, shape: "rounded" };
   if (icon.includes("skilltree"))
-    return { color: "#d8b467", size: 44, ring: false, shape: "rounded" }; // Grosses traces bonus A2/A4/A6
+    return { color: "#d8b467", size: 44, ring: false, shape: "rounded" };
   if (icon.includes("memosprite"))
     return { color: "#9b59b6", size: 48, ring: true, shape: "rounded" };
   if (icon.includes("elation") || icon.includes("_path_"))
     return { color: "#d8b467", size: 48, ring: false, shape: "rounded" };
   if (icon.includes("property") || icon.includes("Icon"))
-    return { color: "#d8b467", size: 30, ring: false, shape: "circle" }; // Petites stats mineures
+    return { color: "#d8b467", size: 30, ring: false, shape: "circle" };
   return { color: "#d8b467", size: 36, ring: false, shape: "rounded" };
 };
 
-// Vérifie si le nœud analysé est un simple bonus de statistique mineur (+X% ATQ)
 export const isStatNode = (node) =>
   (node.icon || "").includes("property") || (node.icon || "").includes("Icon");
 
-// Détermine s'il s'agit d'une compétence majeure (mérite un filtre de lueur)
 export const isMainSkill = (node) => {
   const icon = node.icon || "";
   return (
@@ -44,7 +44,6 @@ export const isMainSkill = (node) => {
   );
 };
 
-// Associe l'icône locale (PNG transparent) stockée dans l'application au nœud SVG correspondant
 export const getLocalIconPath = (charId, node) => {
   if (!charId || !node?.icon) return null;
   const iconStr = node.icon.toLowerCase();
@@ -63,7 +62,6 @@ export const getLocalIconPath = (charId, node) => {
   return null;
 };
 
-// Dictionnaire de conversion des codes de statistiques internes en abrégés clairs en français
 const ICON_TO_LABEL = {
   IconCriticalChance: "CRIT %",
   IconCriticalDamage: "CRIT DMG",
@@ -92,7 +90,43 @@ export const getStatLabel = (node) => {
   return node.propLabel || "✦";
 };
 
-// Sélectionne la matrice de coordonnées absolues de l'arbre selon la classe du personnage (ex: Abondance, Chasse)
+// Map skill node icon patterns to raw skill types from the API
+const ICON_TO_SKILL_TYPE = {
+  basic_atk: "Normal",
+  "_skill.": "BPSkill",
+  ultimate: "Ultra",
+  "_talent.": "Talent",
+  technique: "Maze",
+  maze: "Maze",
+  memosprite_skill: "memo_skill",
+  memosprite_talent: "memo_talent",
+};
+
+// Given a skill tree node, return the raw skill type(s) to look up in allSkills
+const getSkillTypeForNode = (node) => {
+  const icon = (node.icon || "").toLowerCase();
+  for (const [pattern, type] of Object.entries(ICON_TO_SKILL_TYPE)) {
+    if (icon.includes(pattern)) return type;
+  }
+  return null;
+};
+
+// Build grouped skill forms for a selected node, matching against allSkills
+const buildGroupedForms = (node, allSkills) => {
+  if (!node || !allSkills?.length) return null;
+  const targetType = getSkillTypeForNode(node);
+  if (!targetType) return null;
+
+  const matching = allSkills.filter((s) => s.type === targetType);
+  if (matching.length === 0) return null;
+
+  return {
+    isGrouped: matching.length > 1,
+    forms: matching,
+    primarySkill: matching[0],
+  };
+};
+
 const getLayout = (path) => {
   if (!path) return PATH_LAYOUTS["Destruction"];
   const id = typeof path === "object" ? path.id : path;
@@ -106,22 +140,19 @@ const getLayout = (path) => {
   );
 };
 
-// HOOK PRINCIPAL : Gère l'intégralité des liaisons et calculs mathématiques de l'arbre
-export default function useSkillTree({ skillTree, path, charId }) {
-  const [selected, setSelected] = useState(null); // ID du nœud sur lequel le joueur a cliqué pour lire la description
+export default function useSkillTree({ skillTree, path, charId, allSkills }) {
+  const [selected, setSelected] = useState(null);
 
   if (!skillTree?.length) return { hasData: false };
 
   const layout = getLayout(path);
   const { positions, rootConnections } = layout;
 
-  // Crée une table d'indexation rapide par ancre textuelle ("Point01", "Point02"...) pour éviter les boucles imbriquées lentes
   const byAnchor = {};
   skillTree.forEach((n) => {
     byAnchor[n.anchor] = n;
   });
 
-  // 🛠️ CONSTRUCTION DES LIGNES DE CONNEXION DE L'ARBRE
   const connections = [];
   rootConnections.forEach(([fromAnchor, toAnchor]) => {
     const from = positions[fromAnchor];
@@ -133,26 +164,31 @@ export default function useSkillTree({ skillTree, path, charId }) {
     const fromMax = fromNode?.maxLevel || fromNode?.max_level || 1;
     const toMax = toNode?.maxLevel || toNode?.max_level || 1;
 
-    // Une ligne s'allumera en doré brillant uniquement si le nœud parent ET le nœud enfant sont entièrement complétés (maxés)
     const maxed = fromNode?.level >= fromMax && toNode?.level >= toMax;
     connections.push({ from, to, maxed });
   });
 
-  // 🛠️ CALCUL DE LA BARRE DE PROGRESSION GLOBALE DES TRACES
   const total = skillTree.length;
   const unlocked = skillTree.filter(
     (n) => n.level >= (n.maxLevel || n.max_level || 1),
   ).length;
   const pct = Math.round((unlocked / total) * 100);
 
-  // 🛠️ GESTION DU BLOC DESCRIPTIF DU NŒUD ACTUELLEMENT CLIQUÉ
   const selectedNode = selected
     ? skillTree.find((n) => n.id === selected)
     : null;
   const selStyle = selectedNode ? getNodeStyle(selectedNode) : null;
   const isSelectedStat = selectedNode ? isStatNode(selectedNode) : false;
+  const isSelectedMain = selectedNode ? isMainSkill(selectedNode) : false;
+
   const customDetails =
     selectedNode && !isSelectedStat ? getTraceDetails(selectedNode.id) : null;
+
+  // Build grouped skill forms if this is a main skill node
+  const groupedForms =
+    selectedNode && isSelectedMain && !isSelectedStat
+      ? buildGroupedForms(selectedNode, allSkills)
+      : null;
 
   let traceName = "";
   let traceDesc = "";
@@ -162,6 +198,13 @@ export default function useSkillTree({ skillTree, path, charId }) {
       const statLabel = getStatLabel(selectedNode);
       traceName = `Bonus de Statistique : ${statLabel}`;
       traceDesc = `Nœud d'optimisation débloquant un bonus permanent de ${statLabel} pour ce personnage.`;
+    } else if (groupedForms) {
+      // For main skill nodes with grouped forms, use name from primary skill
+      traceName =
+        groupedForms.primarySkill.name ||
+        selectedNode?.name ||
+        selectedNode?.anchor;
+      traceDesc = null; // rendered separately via groupedForms
     } else {
       traceName =
         customDetails?.name || selectedNode?.name || selectedNode?.anchor;
@@ -186,6 +229,8 @@ export default function useSkillTree({ skillTree, path, charId }) {
     selectedNode,
     selStyle,
     isSelectedStat,
+    isSelectedMain,
+    groupedForms,
     traceName,
     traceDesc,
     traceIcon,

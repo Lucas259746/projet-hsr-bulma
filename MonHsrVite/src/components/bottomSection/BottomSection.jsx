@@ -1,9 +1,26 @@
+import { useState } from "react";
 import RelicCard from "../relicComp/RelicCard";
-import SkillCard from "./SkillCard";
+import SkillCard, { SkillForm } from "./SkillCard";
 import SkillTreePanel from "./skillTreePanel/SkillTreePanel";
 import useBottomSection from "./useBottomSection";
+import {
+  sanitizeName,
+  sanitizeAndFormatDescription,
+} from "../characterComp/CharacterDetails";
+import { getSkillIcon } from "../../imageMap/characterMap/imageMap";
 
-// Mini-composant affichant à droite les bonus d'ensemble activés (ex: Set 2 pièces, Set 4 pièces)
+// ── Config couleurs (dupliquée ici pour le panneau de droite) ──
+const SKILL_TYPE_CONFIG = {
+  Normal: { label: "Attaque de base", color: "#e08c30" },
+  BPSkill: { label: "Compétence", color: "#4fa3d1" },
+  Ultra: { label: "Ultime", color: "#d4a0e0" },
+  Talent: { label: "Talent", color: "#7ecba1" },
+  Maze: { label: "Technique", color: "#aaaaaa" },
+  MazeNormal: { label: "Technique", color: "#aaaaaa" },
+  memo_skill: { label: "Mémo-sprite", color: "#9b59b6" },
+  memo_talent: { label: "Mémo-sprite", color: "#9b59b6" },
+};
+
 function RelicSetsPanel({ relicSets }) {
   if (!relicSets?.length) return null;
   return (
@@ -35,8 +52,172 @@ function RelicSetsPanel({ relicSets }) {
   );
 }
 
+// ── Panneau de description d'un skill (colonne droite onglet Skills) ──
+function SkillDetailPanel({ skill, charId }) {
+  if (!skill) {
+    return (
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+        }}
+      >
+        <p
+          style={{
+            color: "#444",
+            fontSize: "0.65rem",
+            fontStyle: "italic",
+            fontFamily: "Inter, sans-serif",
+            textAlign: "center",
+          }}
+        >
+          Sélectionne une aptitude
+          <br />
+          pour afficher ses détails
+        </p>
+      </div>
+    );
+  }
+
+  const cfg = SKILL_TYPE_CONFIG[skill.type] || {
+    label: skill.typeText || skill.type,
+    color: "#d8b467",
+  };
+  const hasDesc = !!(
+    skill.description ||
+    skill.simpleDesc ||
+    (skill.isGrouped && skill.forms?.length)
+  );
+
+  return (
+    <div
+      style={{
+        padding: "16px 18px",
+        background:
+          "linear-gradient(135deg, rgba(216,180,103,0.04) 0%, rgba(0,0,0,0.3) 100%)",
+        border: `1px solid ${cfg.color}33`,
+        borderRadius: "12px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Trait coloré gauche */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: "8%",
+          bottom: "8%",
+          width: "3px",
+          background: cfg.color,
+          borderRadius: "0 2px 2px 0",
+        }}
+      />
+
+      {/* En-tête : icône + nom + type */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "14px",
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: "9px",
+            background: `${cfg.color}18`,
+            border: `1.5px solid ${cfg.color}55`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <img
+            src={getSkillIcon(charId, skill.type)}
+            alt={skill.name}
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        </div>
+        <div>
+          <p
+            style={{
+              color: "#fff",
+              fontSize: "0.9rem",
+              fontWeight: 700,
+              margin: 0,
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            {sanitizeName(skill.name)}
+          </p>
+          <span
+            style={{
+              color: cfg.color,
+              fontSize: "0.6rem",
+              fontFamily: "Orbitron, sans-serif",
+            }}
+          >
+            {cfg.label}
+            {skill.level != null && (
+              <span style={{ color: "#666", marginLeft: "8px" }}>
+                Niv. {skill.level} / {skill.maxLevel}
+              </span>
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Corps : formes groupées ou description simple */}
+      {hasDesc ? (
+        skill.isGrouped && skill.forms?.length ? (
+          skill.forms.map((form, idx) => (
+            <SkillForm
+              key={form.id}
+              form={form}
+              charId={charId}
+              color={cfg.color}
+              isFirst={idx === 0}
+              formIndex={idx}
+            />
+          ))
+        ) : (
+          <div
+            style={{
+              fontSize: "0.73rem",
+              lineHeight: "1.7",
+              color: "#c0c0c0",
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            {sanitizeAndFormatDescription(
+              skill.description || skill.simpleDesc,
+            )}
+          </div>
+        )
+      ) : (
+        <p
+          style={{
+            color: "#555",
+            fontSize: "0.7rem",
+            fontStyle: "italic",
+            margin: 0,
+          }}
+        >
+          Aucune description disponible.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function BottomSection({ activeCharacter }) {
-  // Déstructuration des variables et listes préparées par le Hook de logique useBottomSection
   const {
     activeTab,
     setActiveTab,
@@ -49,94 +230,139 @@ export default function BottomSection({ activeCharacter }) {
     skillTree,
   } = useBottomSection(activeCharacter);
 
+  // Skill sélectionné dans l'onglet Skills
+  const [selectedSkillId, setSelectedSkillId] = useState(null);
+
   if (!activeCharacter) return null;
+
+  const allSkills = activeCharacter.skills || [];
+
+  // Liste plate de tous les skills affichés dans la colonne gauche
+  const allDisplayedSkills = [...mainSkills, ...memoSkills, ...specialSkills];
+  const selectedSkill =
+    allDisplayedSkills.find((s) => s.id === selectedSkillId) || null;
+
+  // Reset la sélection quand on change d'onglet
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSelectedSkillId(null);
+  };
 
   return (
     <div className="box mt-4">
-      {/* ── BARRE DE NAVIGATION DES ONGLETS ── */}
+      {/* ── BARRE DE NAVIGATION ── */}
       <div className="bottom-tabs-nav">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             className={`bottom-tab-btn${activeTab === tab.id ? " is-active" : ""}`}
-            onClick={() => setActiveTab(tab.id)} // Change l'onglet actif au clic
+            onClick={() => handleTabChange(tab.id)}
           >
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* ── ZONE DE CONTENU DES ONGLETS ── */}
       <div className="bottom-tab-content">
-        {/* ONGLET 1 : LES APTITUDES */}
+        {/* ══ ONGLET APTITUDES : 2 colonnes ══ */}
         {activeTab === "skills" && (
-          <div className="columns is-multiline">
-            {/* 1. Compétences classiques */}
-            {mainSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className="column is-half-tablet is-one-third-desktop"
-              >
-                <SkillCard skill={skill} charId={activeCharacter.id} />
-              </div>
-            ))}
+          <div
+            style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}
+          >
+            {/* Colonne gauche : liste des cartes */}
+            <div style={{ width: "260px", flexShrink: 0 }}>
+              {mainSkills.map((skill) => (
+                <SkillCard
+                  key={skill.id}
+                  skill={skill}
+                  charId={activeCharacter.id}
+                  isSelected={selectedSkillId === skill.id}
+                  onClick={() =>
+                    setSelectedSkillId((s) =>
+                      s === skill.id ? null : skill.id,
+                    )
+                  }
+                />
+              ))}
 
-            {/* 2. Invocations Mémo-sprites (S'il y en a) */}
-            {memoSkills.length > 0 && (
-              <>
-                <div className="column is-12">
+              {memoSkills.length > 0 && (
+                <>
                   <div
-                    className="is-size-7 font-orbitron has-text-grey my-1"
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.08)",
+                      fontSize: "0.55rem",
+                      color: "#555",
+                      fontFamily: "Orbitron, sans-serif",
+                      letterSpacing: "0.12em",
+                      marginTop: "14px",
+                      marginBottom: "6px",
                       paddingTop: "10px",
+                      borderTop: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     MÉMO-SPRITES
                   </div>
-                </div>
-                {memoSkills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="column is-half-tablet is-one-third-desktop"
-                  >
-                    <SkillCard skill={skill} charId={activeCharacter.id} />
-                  </div>
-                ))}
-              </>
-            )}
+                  {memoSkills.map((skill) => (
+                    <SkillCard
+                      key={skill.id}
+                      skill={skill}
+                      charId={activeCharacter.id}
+                      isSelected={selectedSkillId === skill.id}
+                      onClick={() =>
+                        setSelectedSkillId((s) =>
+                          s === skill.id ? null : skill.id,
+                        )
+                      }
+                    />
+                  ))}
+                </>
+              )}
 
-            {/* 3. Aptitudes spéciales de combat (S'il y en a) */}
-            {specialSkills.length > 0 && (
-              <>
-                <div className="column is-12">
+              {specialSkills.length > 0 && (
+                <>
                   <div
-                    className="is-size-7 font-orbitron has-text-grey my-1"
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.08)",
+                      fontSize: "0.55rem",
+                      color: "#555",
+                      fontFamily: "Orbitron, sans-serif",
+                      letterSpacing: "0.12em",
+                      marginTop: "14px",
+                      marginBottom: "6px",
                       paddingTop: "10px",
+                      borderTop: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     APTITUDES SPÉCIALES
                   </div>
-                </div>
-                {specialSkills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="column is-half-tablet is-one-third-desktop"
-                  >
-                    <SkillCard skill={skill} charId={activeCharacter.id} />
-                  </div>
-                ))}
-              </>
-            )}
+                  {specialSkills.map((skill) => (
+                    <SkillCard
+                      key={skill.id}
+                      skill={skill}
+                      charId={activeCharacter.id}
+                      isSelected={selectedSkillId === skill.id}
+                      onClick={() =>
+                        setSelectedSkillId((s) =>
+                          s === skill.id ? null : skill.id,
+                        )
+                      }
+                    />
+                  ))}
+                </>
+              )}
+            </div>
+
+            {/* Colonne droite : panneau de description */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <SkillDetailPanel
+                skill={selectedSkill}
+                charId={activeCharacter.id}
+              />
+            </div>
           </div>
         )}
 
-        {/* ONGLET 2 : LES RELIQUES */}
+        {/* ══ ONGLET RELIQUES ══ */}
         {activeTab === "relics" && (
           <div className="columns">
-            {/* Grille principale listant les pièces d'équipement (Tête, Mains, Torse, Pieds...) */}
             <div className="column is-8">
               <div className="columns is-multiline">
                 {relics.map((relic) => (
@@ -149,123 +375,20 @@ export default function BottomSection({ activeCharacter }) {
                 ))}
               </div>
             </div>
-            {/* Barre latérale droite compilant les bonus de panoplie */}
             <div className="column is-4">
               <RelicSetsPanel relicSets={relicSets} />
             </div>
           </div>
         )}
 
-        {/* ONGLET 3 : L'ARBRE DES TRACES (SKILL TREE) */}
+        {/* ══ ONGLET SKILL TREE : 2 colonnes ══ */}
         {activeTab === "tree" && (
-          <div className="columns">
-            {/* L'Arbre SVG interactif complexe */}
-            <div className="column is-8-desktop">
-              <SkillTreePanel
-                skillTree={skillTree}
-                charId={activeCharacter.id}
-                path={activeCharacter.path}
-              />
-            </div>
-            {/* Légende explicative fixe sur le côté droit */}
-            <div className="column is-4-desktop">
-              <div
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(8,12,20,0.97) 0%, rgba(5,8,15,0.99) 100%)",
-                  border: "1px solid rgba(216,180,103,0.15)",
-                  borderRadius: "14px",
-                  padding: "18px",
-                }}
-              >
-                <p
-                  className="font-orbitron mb-4"
-                  style={{
-                    fontSize: "0.62rem",
-                    color: "#d8b467",
-                    letterSpacing: "0.12em",
-                  }}
-                >
-                  LÉGENDE
-                </p>
-                {[
-                  {
-                    color: "#e08c30",
-                    label: "Attaque de base",
-                    shape: "square",
-                  },
-                  { color: "#4fa3d1", label: "Compétence", shape: "square" },
-                  { color: "#d4a0e0", label: "Ultime", shape: "square" },
-                  { color: "#7ecba1", label: "Talent", shape: "square" },
-                  { color: "#aaaaaa", label: "Technique", shape: "square" },
-                  {
-                    color: "#d8b467",
-                    label: "Traces A2 / A4 / A6",
-                    shape: "square",
-                  },
-                  { color: "#9b59b6", label: "Mémo-sprite", shape: "square" },
-                  {
-                    color: "#d8b467",
-                    label: "Nœuds de statistiques",
-                    shape: "circle",
-                  },
-                ].map(({ color, label, shape }) => (
-                  <div
-                    key={label}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "11px",
-                        height: "11px",
-                        flexShrink: 0,
-                        borderRadius: shape === "circle" ? "50%" : "3px",
-                        background: color + "30",
-                        border: `1.5px solid ${color}`,
-                        boxShadow: `0 0 4px ${color}44`,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: "0.68rem",
-                        color: "#a0a0a0",
-                        fontFamily: "Inter, sans-serif",
-                      }}
-                    >
-                      {label}
-                    </span>
-                  </div>
-                ))}
-                <div
-                  style={{
-                    marginTop: "14px",
-                    paddingTop: "12px",
-                    borderTop: "1px solid rgba(216,180,103,0.1)",
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: "0.58rem",
-                      color: "#444",
-                      fontStyle: "italic",
-                      lineHeight: 1.5,
-                      fontFamily: "Inter, sans-serif",
-                    }}
-                  >
-                    Nœuds transparents = non débloqués.
-                    <br />
-                    Les connexions principales varient selon la Voie du
-                    personnage.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <SkillTreePanel
+            skillTree={skillTree}
+            charId={activeCharacter.id}
+            path={activeCharacter.path}
+            allSkills={allSkills}
+          />
         )}
       </div>
     </div>

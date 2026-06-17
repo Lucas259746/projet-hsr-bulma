@@ -1,4 +1,4 @@
-import { getCharacterImages } from "../../imageMap/imageMap";
+import { getCharacterImages } from "../../imageMap/characterMap/imageMap";
 
 // Dictionnaire associant chaque clé de statistique serveur à un émoji visuel
 export const STAT_ICONS = {
