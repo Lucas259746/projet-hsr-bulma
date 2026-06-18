@@ -7,27 +7,27 @@ import {
   sanitizeName,
   sanitizeAndFormatDescription,
 } from "../characterComp/CharacterDetails";
-import { getSkillIcon } from "../../imageMap/characterMap/imageMap";
+import { getSkillIcon, getSkillIconForForm } from "../../imageMap/characterMap/imageMap";
+
 
 // ── Config couleurs (dupliquée ici pour le panneau de droite) ──
 const SKILL_TYPE_CONFIG = {
-  Normal: { label: "Attaque de base", color: "#e08c30" },
-  BPSkill: { label: "Compétence", color: "#4fa3d1" },
-  Ultra: { label: "Ultime", color: "#d4a0e0" },
-  Talent: { label: "Talent", color: "#7ecba1" },
-  Maze: { label: "Technique", color: "#aaaaaa" },
-  MazeNormal: { label: "Technique", color: "#aaaaaa" },
-  memo_skill: { label: "Mémo-sprite", color: "#9b59b6" },
-  memo_talent: { label: "Mémo-sprite", color: "#9b59b6" },
+  Normal:        { label: "Attaque de base", color: "#e08c30" },
+  BPSkill:       { label: "Compétence",      color: "#4fa3d1" },
+  Ultra:         { label: "Ultime",          color: "#d4a0e0" },
+  Talent:        { label: "Talent",          color: "#7ecba1" },
+  Maze:          { label: "Technique",       color: "#aaaaaa" },
+  MazeNormal:    { label: "Technique",       color: "#aaaaaa" },
+  memo_skill:    { label: "Mémo-sprite",     color: "#9b59b6" },
+  memo_talent:   { label: "Mémo-sprite",     color: "#9b59b6" },
+  ElationDamage: { label: "Elation Skill",   color: "#f4d258" },
 };
 
 function RelicSetsPanel({ relicSets }) {
   if (!relicSets?.length) return null;
   return (
     <div className="mt-0">
-      <h5 className="title is-6 font-orbitron has-text-gold mb-3">
-        Bonus de Sets
-      </h5>
+      <h5 className="title is-6 font-orbitron has-text-gold mb-3">Bonus de Sets</h5>
       {relicSets.map((set) => (
         <div
           key={`${set.id}-${set.num}`}
@@ -35,17 +35,10 @@ function RelicSetsPanel({ relicSets }) {
           style={{ borderLeft: "3px solid #f29e38" }}
         >
           <div className="is-flex is-justify-content-space-between is-align-items-center mb-1">
-            <span className="has-text-white is-size-7 has-text-weight-bold">
-              {set.name}
-            </span>
+            <span className="has-text-white is-size-7 has-text-weight-bold">{set.name}</span>
             <span className="tag is-warning is-small">{set.num} pcs</span>
           </div>
-          <p
-            className="is-size-7 has-text-grey-lighter"
-            style={{ lineHeight: "1.3" }}
-          >
-            {set.desc}
-          </p>
+          <p className="is-size-7 has-text-grey-lighter" style={{ lineHeight: "1.3" }}>{set.desc}</p>
         </div>
       ))}
     </div>
@@ -65,39 +58,23 @@ function SkillDetailPanel({ skill, charId }) {
           padding: "24px",
         }}
       >
-        <p
-          style={{
-            color: "#444",
-            fontSize: "0.65rem",
-            fontStyle: "italic",
-            fontFamily: "Inter, sans-serif",
-            textAlign: "center",
-          }}
-        >
-          Sélectionne une aptitude
-          <br />
-          pour afficher ses détails
+        <p style={{ color: "#444", fontSize: "0.65rem", fontStyle: "italic", fontFamily: "Inter, sans-serif", textAlign: "center" }}>
+          Sélectionne une aptitude<br />pour afficher ses détails
         </p>
       </div>
     );
   }
 
-  const cfg = SKILL_TYPE_CONFIG[skill.type] || {
-    label: skill.typeText || skill.type,
-    color: "#d8b467",
-  };
-  const hasDesc = !!(
-    skill.description ||
-    skill.simpleDesc ||
-    (skill.isGrouped && skill.forms?.length)
-  );
+  const cfg = SKILL_TYPE_CONFIG[skill.type] || { label: skill.typeText || skill.type, color: "#d8b467" };
+  const hasDesc = !!(skill.description || skill.simpleDesc || (skill.isGrouped && skill.forms?.length));
+  // Icône : pour un skill groupé on prend la 1ère forme, pour un simple on prend le type direct
+  const headerIcon = getSkillIcon(charId, skill.type);
 
   return (
     <div
       style={{
         padding: "16px 18px",
-        background:
-          "linear-gradient(135deg, rgba(216,180,103,0.04) 0%, rgba(0,0,0,0.3) 100%)",
+        background: "linear-gradient(135deg, rgba(216,180,103,0.04) 0%, rgba(0,0,0,0.3) 100%)",
         border: `1px solid ${cfg.color}33`,
         borderRadius: "12px",
         position: "relative",
@@ -107,63 +84,27 @@ function SkillDetailPanel({ skill, charId }) {
       {/* Trait coloré gauche */}
       <div
         style={{
-          position: "absolute",
-          left: 0,
-          top: "8%",
-          bottom: "8%",
-          width: "3px",
-          background: cfg.color,
-          borderRadius: "0 2px 2px 0",
+          position: "absolute", left: 0, top: "8%", bottom: "8%",
+          width: "3px", background: cfg.color, borderRadius: "0 2px 2px 0",
         }}
       />
 
       {/* En-tête : icône + nom + type */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "14px",
-        }}
-      >
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: "9px",
-            background: `${cfg.color}18`,
-            border: `1.5px solid ${cfg.color}55`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <img
-            src={getSkillIcon(charId, skill.type)}
-            alt={skill.name}
-            style={{ width: "100%", height: "100%", objectFit: "contain" }}
-          />
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+        {headerIcon && (
+          <div style={{
+            width: 44, height: 44, borderRadius: "9px",
+            background: `${cfg.color}18`, border: `1.5px solid ${cfg.color}55`,
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <img src={headerIcon} alt={skill.name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
+        )}
         <div>
-          <p
-            style={{
-              color: "#fff",
-              fontSize: "0.9rem",
-              fontWeight: 700,
-              margin: 0,
-              fontFamily: "Inter, sans-serif",
-            }}
-          >
+          <p style={{ color: "#fff", fontSize: "0.9rem", fontWeight: 700, margin: 0, fontFamily: "Inter, sans-serif" }}>
             {sanitizeName(skill.name)}
           </p>
-          <span
-            style={{
-              color: cfg.color,
-              fontSize: "0.6rem",
-              fontFamily: "Orbitron, sans-serif",
-            }}
-          >
+          <span style={{ color: cfg.color, fontSize: "0.6rem", fontFamily: "Orbitron, sans-serif" }}>
             {cfg.label}
             {skill.level != null && (
               <span style={{ color: "#666", marginLeft: "8px" }}>
@@ -185,31 +126,16 @@ function SkillDetailPanel({ skill, charId }) {
               color={cfg.color}
               isFirst={idx === 0}
               formIndex={idx}
+              hideIcon={idx === 0}
             />
           ))
         ) : (
-          <div
-            style={{
-              fontSize: "0.73rem",
-              lineHeight: "1.7",
-              color: "#c0c0c0",
-              fontFamily: "Inter, sans-serif",
-            }}
-          >
-            {sanitizeAndFormatDescription(
-              skill.description || skill.simpleDesc,
-            )}
+          <div style={{ fontSize: "0.73rem", lineHeight: "1.7", color: "#c0c0c0", fontFamily: "Inter, sans-serif" }}>
+            {sanitizeAndFormatDescription(skill.description || skill.simpleDesc)}
           </div>
         )
       ) : (
-        <p
-          style={{
-            color: "#555",
-            fontSize: "0.7rem",
-            fontStyle: "italic",
-            margin: 0,
-          }}
-        >
+        <p style={{ color: "#555", fontSize: "0.7rem", fontStyle: "italic", margin: 0 }}>
           Aucune description disponible.
         </p>
       )}
@@ -239,8 +165,7 @@ export default function BottomSection({ activeCharacter }) {
 
   // Liste plate de tous les skills affichés dans la colonne gauche
   const allDisplayedSkills = [...mainSkills, ...memoSkills, ...specialSkills];
-  const selectedSkill =
-    allDisplayedSkills.find((s) => s.id === selectedSkillId) || null;
+  const selectedSkill = allDisplayedSkills.find((s) => s.id === selectedSkillId) || null;
 
   // Reset la sélection quand on change d'onglet
   const handleTabChange = (tabId) => {
@@ -264,24 +189,21 @@ export default function BottomSection({ activeCharacter }) {
       </div>
 
       <div className="bottom-tab-content">
+
         {/* ══ ONGLET APTITUDES : 2 colonnes ══ */}
         {activeTab === "skills" && (
-          <div
-            style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}
-          >
+          <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+
             {/* Colonne gauche : liste des cartes */}
             <div style={{ width: "260px", flexShrink: 0 }}>
+
               {mainSkills.map((skill) => (
                 <SkillCard
                   key={skill.id}
                   skill={skill}
                   charId={activeCharacter.id}
                   isSelected={selectedSkillId === skill.id}
-                  onClick={() =>
-                    setSelectedSkillId((s) =>
-                      s === skill.id ? null : skill.id,
-                    )
-                  }
+                  onClick={() => setSelectedSkillId((s) => s === skill.id ? null : skill.id)}
                 />
               ))}
 
@@ -289,14 +211,9 @@ export default function BottomSection({ activeCharacter }) {
                 <>
                   <div
                     style={{
-                      fontSize: "0.55rem",
-                      color: "#555",
-                      fontFamily: "Orbitron, sans-serif",
-                      letterSpacing: "0.12em",
-                      marginTop: "14px",
-                      marginBottom: "6px",
-                      paddingTop: "10px",
-                      borderTop: "1px solid rgba(255,255,255,0.06)",
+                      fontSize: "0.55rem", color: "#555", fontFamily: "Orbitron, sans-serif",
+                      letterSpacing: "0.12em", marginTop: "14px", marginBottom: "6px",
+                      paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     MÉMO-SPRITES
@@ -307,11 +224,7 @@ export default function BottomSection({ activeCharacter }) {
                       skill={skill}
                       charId={activeCharacter.id}
                       isSelected={selectedSkillId === skill.id}
-                      onClick={() =>
-                        setSelectedSkillId((s) =>
-                          s === skill.id ? null : skill.id,
-                        )
-                      }
+                      onClick={() => setSelectedSkillId((s) => s === skill.id ? null : skill.id)}
                     />
                   ))}
                 </>
@@ -321,14 +234,9 @@ export default function BottomSection({ activeCharacter }) {
                 <>
                   <div
                     style={{
-                      fontSize: "0.55rem",
-                      color: "#555",
-                      fontFamily: "Orbitron, sans-serif",
-                      letterSpacing: "0.12em",
-                      marginTop: "14px",
-                      marginBottom: "6px",
-                      paddingTop: "10px",
-                      borderTop: "1px solid rgba(255,255,255,0.06)",
+                      fontSize: "0.55rem", color: "#555", fontFamily: "Orbitron, sans-serif",
+                      letterSpacing: "0.12em", marginTop: "14px", marginBottom: "6px",
+                      paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     APTITUDES SPÉCIALES
@@ -339,11 +247,7 @@ export default function BottomSection({ activeCharacter }) {
                       skill={skill}
                       charId={activeCharacter.id}
                       isSelected={selectedSkillId === skill.id}
-                      onClick={() =>
-                        setSelectedSkillId((s) =>
-                          s === skill.id ? null : skill.id,
-                        )
-                      }
+                      onClick={() => setSelectedSkillId((s) => s === skill.id ? null : skill.id)}
                     />
                   ))}
                 </>
@@ -352,10 +256,7 @@ export default function BottomSection({ activeCharacter }) {
 
             {/* Colonne droite : panneau de description */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <SkillDetailPanel
-                skill={selectedSkill}
-                charId={activeCharacter.id}
-              />
+              <SkillDetailPanel skill={selectedSkill} charId={activeCharacter.id} />
             </div>
           </div>
         )}
@@ -366,10 +267,7 @@ export default function BottomSection({ activeCharacter }) {
             <div className="column is-8">
               <div className="columns is-multiline">
                 {relics.map((relic) => (
-                  <div
-                    key={relic.id || relic.name}
-                    className="column is-half-tablet is-one-third-widescreen"
-                  >
+                  <div key={relic.id || relic.name} className="column is-half-tablet is-one-third-widescreen">
                     <RelicCard relic={relic} />
                   </div>
                 ))}

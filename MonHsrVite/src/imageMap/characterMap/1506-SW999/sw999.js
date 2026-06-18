@@ -8,9 +8,12 @@ export const CHARACTERS_1506 = {
 export const SKILLS_1506 = {
   1506: {
     Normal: "./public/images/skills/1506-SW999/basicAtk.webp",
+    Normal2: "./public/images/skills/1506-SW999/basicAtk2.webp",
     BPSkill: "./public/images/skills/1506-SW999/Skill.webp",
     Ultra: "./public/images/skills/1506-SW999/Ultimate.webp",
     Talent: "./public/images/skills/1506-SW999/Talent.webp",
+    ElationDamage: "./public/images/skills/1506-SW999/elaSkill.webp",
+    ElationDamage2: "./public/images/skills/1506-SW999/elaSkill2.webp",
     Maze: "./public/images/skills/1506-SW999/Technique.webp",
     MazeNormal: "./public/images/skills/1506-SW999/basicAtk.webp",
     skill_basic: "./public/images/skills/1506-SW999/basicAtk.webp",
@@ -18,6 +21,7 @@ export const SKILLS_1506 = {
     skill_ultra: "./public/images/skills/1506-SW999/Ultimate.webp",
     skill_talent: "./public/images/skills/1506-SW999/Talent.webp",
     skill_tech: "./public/images/skills/1506-SW999/Technique.webp",
+    skill_elation: "./public/images/skills/1506-SW999/elaSkill.webp",
     trace_a2: "./public/images/skills/1506-SW999/Trace1.webp",
     trace_a4: "./public/images/skills/1506-SW999/Trace2.webp",
     trace_a6: "./public/images/skills/1506-SW999/Trace3.webp",

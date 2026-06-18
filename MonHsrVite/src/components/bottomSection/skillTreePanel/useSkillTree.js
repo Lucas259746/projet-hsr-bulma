@@ -39,6 +39,7 @@ export const isMainSkill = (node) => {
     icon.includes("ultimate") ||
     icon.includes("_talent.") ||
     icon.includes("memosprite") ||
+    icon.includes("elation") ||
     icon.includes("technique") ||
     icon.includes("maze")
   );
@@ -59,6 +60,7 @@ export const getLocalIconPath = (charId, node) => {
     if (idStr.endsWith("102")) return getSkillIcon(charId, "trace_a4");
     if (idStr.endsWith("103")) return getSkillIcon(charId, "trace_a6");
   }
+  if (iconStr.includes("elation")) return getSkillIcon(charId, "skill_elation");
   return null;
 };
 
@@ -100,6 +102,7 @@ const ICON_TO_SKILL_TYPE = {
   maze: "Maze",
   memosprite_skill: "memo_skill",
   memosprite_talent: "memo_talent",
+  elation: "ElationDamage",
 };
 
 // Given a skill tree node, return the raw skill type(s) to look up in allSkills

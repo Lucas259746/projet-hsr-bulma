@@ -56,11 +56,20 @@ export default function useBottomSection(activeCharacter) {
     };
   }).filter(Boolean);
 
-  const specialSkills = allSkills.filter(
-    (s) =>
-      SPECIAL_TYPES.has(s.type) ||
-      (!MAIN_TYPES.has(s.type) && !SPECIAL_TYPES.has(s.type)),
+  // Groupe les special skills par type (comme mainSkills) pour fusionner les formes multiples
+  const specialSkillsRaw = allSkills.filter(
+    (s) => SPECIAL_TYPES.has(s.type) || (!MAIN_TYPES.has(s.type) && !MEMO_TYPES.has(s.type)),
   );
+  const specialByType = {};
+  specialSkillsRaw.forEach((s) => {
+    if (!specialByType[s.type]) specialByType[s.type] = [];
+    specialByType[s.type].push(s);
+  });
+  const specialSkills = Object.values(specialByType).map((group) => ({
+    ...group[0],
+    isGrouped: group.length > 1,
+    forms: group,
+  }));
 
   return {
     activeCharacter,

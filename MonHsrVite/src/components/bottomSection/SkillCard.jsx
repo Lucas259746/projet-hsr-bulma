@@ -117,16 +117,18 @@ export function SkillForm({ form, charId, color, isFirst, formIndex = 0 }) {
           </div>
         </div>
       </div>
-      <div
-        style={{
-          fontSize: "0.72rem",
-          lineHeight: "1.65",
-          color: "#c0c0c0",
-          fontFamily: "Inter, sans-serif",
-        }}
-      >
-        {sanitizeAndFormatDescription(form.description || form.simpleDesc)}
-      </div>
+      {(() => {
+        const desc = form.description || form.simpleDesc || "";
+        const isHtml = /<[a-z][\s\S]*>/i.test(desc);
+        return (
+          <div
+            style={{ fontSize: "0.72rem", lineHeight: "1.65", color: "#c0c0c0", fontFamily: "Inter, sans-serif" }}
+            {...(isHtml ? { dangerouslySetInnerHTML: { __html: desc } } : {})}
+          >
+            {isHtml ? null : sanitizeAndFormatDescription(desc)}
+          </div>
+        );
+      })()}
     </div>
   );
 }
