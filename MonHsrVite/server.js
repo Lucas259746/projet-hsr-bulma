@@ -8,7 +8,6 @@ const PORT = 5000; // Le serveur écoutera sur l'adresse locale http://localhost
 // ── CONFIGURATION DES MIDDLEWARES ──
 
 // CORS (Cross-Origin Resource Sharing) : Obligatoire pour autoriser ton application React (généralement sur le port 3000)
-// à faire des requêtes AJAX 'fetch/axios' vers ce serveur (sur le port 5000). Sans cela, le navigateur bloque la requête par sécurité.
 app.use(cors());
 
 // Analyseur JSON : Permet au serveur de lire et de décoder automatiquement le contenu des requêtes

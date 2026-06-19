@@ -8,17 +8,17 @@ import {
 export const getNodeStyle = (node) => {
   const icon = node.icon || "";
   if (icon.includes("basic_atk"))
-    return { color: "#e08c30", size: 54, ring: true, shape: "rounded" };
+    return { color: "#c76904", size: 54, ring: true, shape: "rounded" };
   if (icon.includes("_skill."))
-    return { color: "#4fa3d1", size: 54, ring: true, shape: "rounded" };
+    return { color: "#22668b", size: 54, ring: true, shape: "rounded" };
   if (icon.includes("ultimate"))
-    return { color: "#d4a0e0", size: 54, ring: true, shape: "rounded" };
+    return { color: "#916c99", size: 54, ring: true, shape: "rounded" };
   if (icon.includes("_talent."))
-    return { color: "#7ecba1", size: 54, ring: true, shape: "rounded" };
+    return { color: "#659279", size: 54, ring: true, shape: "rounded" };
   if (icon.includes("technique") || icon.includes("maze"))
-    return { color: "#aaaaaa", size: 44, ring: false, shape: "rounded" };
+    return { color: "#634747", size: 44, ring: false, shape: "rounded" };
   if (icon.includes("skilltree"))
-    return { color: "#d8b467", size: 44, ring: false, shape: "rounded" };
+    return { color: "#74591e", size: 44, ring: false, shape: "rounded" };
   if (icon.includes("memosprite"))
     return { color: "#9b59b6", size: 48, ring: true, shape: "rounded" };
   if (icon.includes("elation") || icon.includes("_path_"))
